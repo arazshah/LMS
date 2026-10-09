@@ -1,50 +1,47 @@
-# Deployed by Coolify (Docker Compose build pack).
-# In Coolify: assign the domain (lms.araz.me / staging.lms.araz.me) to the `web` service
-# on port 8000 and set the environment variables listed in .env.example.
+# Deployed by Coolify (Docker Compose build pack). No environment variables are required:
+# set the domain of the `web` service (e.g. https://lms.araz.me) and deploy.
+# On first start the app generates its secret key and creates the initial admin.
+# Every variable below can optionally be overridden in Coolify's environment settings.
 services:
   web:
     build: .
     command: web
-    environment:
-      - DJANGO_DEBUG=${DJANGO_DEBUG:-False}
-      - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY:?set DJANGO_SECRET_KEY}
-      - DJANGO_ALLOWED_HOSTS=${DJANGO_ALLOWED_HOSTS:?set DJANGO_ALLOWED_HOSTS}
-      - DJANGO_CSRF_TRUSTED_ORIGINS=${DJANGO_CSRF_TRUSTED_ORIGINS:?set DJANGO_CSRF_TRUSTED_ORIGINS}
-      - DJANGO_ADMIN_URL=${DJANGO_ADMIN_URL:-admin/}
-      - DATABASE_URL=postgres://${POSTGRES_USER:-lms}:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-lms}
-      - REDIS_URL=redis://redis:6379/0
+    environment: &app-env
+      DJANGO_DEBUG: ${DJANGO_DEBUG:-False}
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:-}
+      DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:-lms.araz.me,staging.lms.araz.me,localhost,127.0.0.1}
+      DJANGO_CSRF_TRUSTED_ORIGINS: ${DJANGO_CSRF_TRUSTED_ORIGINS:-https://lms.araz.me,https://staging.lms.araz.me}
+      DJANGO_ADMIN_URL: ${DJANGO_ADMIN_URL:-admin/}
+      DJANGO_DATA_DIR: /app/data
+      DATABASE_URL: postgres://lms:${POSTGRES_PASSWORD:-lms_internal_db}@db:5432/lms
+      REDIS_URL: redis://redis:6379/0
     volumes:
       - media:/app/media
+      - app-data:/app/data
     expose:
-      - "8000"
+      - "80"
     depends_on:
       db:
         condition: service_healthy
       redis:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8000/health/"]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1/health/', timeout=4)"]
       interval: 30s
       timeout: 5s
       retries: 5
-      start_period: 30s
+      start_period: 60s
     restart: unless-stopped
 
   worker:
     build: .
     command: worker
-    environment:
-      - DJANGO_DEBUG=${DJANGO_DEBUG:-False}
-      - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY:?set DJANGO_SECRET_KEY}
-      - DJANGO_ALLOWED_HOSTS=${DJANGO_ALLOWED_HOSTS:?set DJANGO_ALLOWED_HOSTS}
-      - DATABASE_URL=postgres://${POSTGRES_USER:-lms}:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-lms}
-      - REDIS_URL=redis://redis:6379/0
+    environment: *app-env
     volumes:
       - media:/app/media
+      - app-data:/app/data
     depends_on:
-      db:
-        condition: service_healthy
-      redis:
+      web:
         condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "celery -A config inspect ping -d celery@$$HOSTNAME || exit 1"]
@@ -54,16 +51,17 @@ services:
       start_period: 30s
     restart: unless-stopped
 
+  # Not exposed outside the compose network.
   db:
     image: postgres:17-alpine
     environment:
-      - POSTGRES_DB=${POSTGRES_DB:-lms}
-      - POSTGRES_USER=${POSTGRES_USER:-lms}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}
+      POSTGRES_DB: lms
+      POSTGRES_USER: lms
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-lms_internal_db}
     volumes:
       - postgres-data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      test: ["CMD-SHELL", "pg_isready -U lms -d lms"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -82,5 +80,6 @@ services:
 
 volumes:
   media:
+  app-data:
   postgres-data:
   redis-data:

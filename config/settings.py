@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import environ
+from django.core.exceptions import ImproperlyConfigured
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -8,9 +9,29 @@ env = environ.Env()
 environ.Env.read_env(BASE_DIR / ".env", overwrite=False)
 
 DEBUG = env.bool("DJANGO_DEBUG", default=False)
-SECRET_KEY = env("DJANGO_SECRET_KEY", default="insecure-dev-key" if DEBUG else environ.Env.NOTSET)
-ALLOWED_HOSTS = env.list("DJANGO_ALLOWED_HOSTS", default=["localhost", "127.0.0.1"])
-CSRF_TRUSTED_ORIGINS = env.list("DJANGO_CSRF_TRUSTED_ORIGINS", default=[])
+# Persistent data that is not user media (e.g. the auto-generated secret key).
+DATA_DIR = Path(env("DJANGO_DATA_DIR", default=str(BASE_DIR / "data")))
+
+
+def _secret_key():
+    """Use DJANGO_SECRET_KEY if set, else the key the entrypoint generated in DATA_DIR."""
+    if key := env("DJANGO_SECRET_KEY", default=""):
+        return key
+    key_file = DATA_DIR / "secret_key"
+    if key_file.exists():
+        return key_file.read_text().strip()
+    if DEBUG:
+        return "insecure-dev-key"
+    raise ImproperlyConfigured("Set DJANGO_SECRET_KEY or create DATA_DIR/secret_key.")
+
+
+SECRET_KEY = _secret_key()
+
+DOMAINS = ["lms.araz.me", "staging.lms.araz.me"]
+ALLOWED_HOSTS = env.list("DJANGO_ALLOWED_HOSTS", default=[*DOMAINS, "localhost", "127.0.0.1"])
+CSRF_TRUSTED_ORIGINS = env.list(
+    "DJANGO_CSRF_TRUSTED_ORIGINS", default=[f"https://{d}" for d in DOMAINS]
+)
 ADMIN_URL = env("DJANGO_ADMIN_URL", default="admin/")
 
 INSTALLED_APPS = [
@@ -33,6 +54,7 @@ MIDDLEWARE = [
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
+    "apps.accounts.middleware.ForcePasswordChangeMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
@@ -83,7 +105,7 @@ STORAGES = {
 }
 
 MEDIA_URL = "media/"
-MEDIA_ROOT = env.path("DJANGO_MEDIA_ROOT", default=BASE_DIR / "media")
+MEDIA_ROOT = Path(env("DJANGO_MEDIA_ROOT", default=str(BASE_DIR / "media")))
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 

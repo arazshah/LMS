@@ -17,7 +17,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PIP_DISABLE_PIP_VERSION_CHECK=1
 
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends ffmpeg curl \
+    && apt-get install -y --no-install-recommends ffmpeg \
     && rm -rf /var/lib/apt/lists/*
 
 RUN useradd --create-home --uid 1000 app
@@ -30,9 +30,9 @@ COPY --chown=app:app . .
 COPY --from=frontend --chown=app:app /app/static/dist ./static/dist
 
 RUN DJANGO_SECRET_KEY=build-only python manage.py collectstatic --noinput \
-    && mkdir -p /app/media && chown app:app /app/media
+    && mkdir -p /app/media /app/data && chown app:app /app/media /app/data
 
 USER app
-EXPOSE 8000
+EXPOSE 80
 ENTRYPOINT ["./docker/entrypoint.sh"]
 CMD ["web"]

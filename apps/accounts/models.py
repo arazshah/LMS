@@ -34,6 +34,11 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField("فعال", default=True)
     is_staff = models.BooleanField("دسترسی مدیریت", default=False)
     date_joined = models.DateTimeField("تاریخ عضویت", default=timezone.now)
+    must_change_password = models.BooleanField(
+        "الزام به تغییر رمز",
+        default=False,
+        help_text="کاربر تا رمز خود را عوض نکند به بخش‌های دیگر دسترسی ندارد.",
+    )
 
     objects = UserManager()
 
@@ -50,6 +55,10 @@ class User(AbstractBaseUser, PermissionsMixin):
     def clean(self):
         super().clean()
         self.phone = normalize_phone(self.phone)
+
+    def set_password(self, raw_password):
+        super().set_password(raw_password)
+        self.must_change_password = False
 
     def get_full_name(self):
         return f"{self.first_name} {self.last_name}".strip()

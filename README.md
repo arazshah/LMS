@@ -26,35 +26,47 @@ ruff check . && ruff format --check .
 
 ## دیپلوی روی Coolify
 
-### شاخه‌ها
-
-| شاخه | دامنه | کاربرد |
-|---|---|---|
-| `main` | `lms.araz.me` | production |
-| `develop` | `staging.lms.araz.me` | تست قبل از انتشار |
+برای دیپلوی **نیازی به ترمینال یا تعریف متغیر محیطی نیست.**
 
 ### راه‌اندازی (یک بار برای هر محیط)
 
-1. در DNS برای `lms` و `staging.lms` رکورد A به IP سرور بسازید.
-2. در Coolify از مسیر **New Resource → Docker Compose** مخزن `arazshah/LMS` را انتخاب کنید و شاخه را تعیین کنید.
-3. برای سرویس `web` دامنه را تنظیم کنید (مثلاً `https://lms.araz.me`) و پورت را **8000** بگذارید.
-4. متغیرهای محیطی را تعریف کنید (نمونه در `.env.example`):
-   - `DJANGO_SECRET_KEY`: یک رشته تصادفی طولانی، مثلاً با `openssl rand -base64 48`
-   - `DJANGO_ALLOWED_HOSTS=lms.araz.me`
-   - `DJANGO_CSRF_TRUSTED_ORIGINS=https://lms.araz.me`
-   - `DJANGO_ADMIN_URL`: مسیر غیرقابل‌حدس برای پنل ادمین، مثلاً `my-panel-x7/`
-   - `POSTGRES_PASSWORD`: رمز قوی
-5. Webhook گیت‌هاب را فعال کنید تا هر push خودکار دیپلوی شود.
-6. بعد از اولین دیپلوی، در ترمینال سرویس `web` در Coolify ادمین را بسازید:
-   ```bash
-   python manage.py createsuperuser
-   ```
+1. در DNS برای دامنه (`lms.araz.me` و در صورت نیاز `staging.lms.araz.me`) رکورد A به IP سرور بسازید.
+2. در Coolify از مسیر **New Resource → Docker Compose** مخزن `arazshah/LMS` و شاخه مورد نظر را انتخاب کنید.
+3. در بخش سرویس `web`، دامنه را وارد کنید: `https://lms.araz.me`
+4. **Deploy** را بزنید. Webhook گیت‌هاب بعد از هر push خودکار دیپلوی می‌کند.
+
+### در اولین اجرا به‌صورت خودکار
+
+- کلید امنیتی ساخته می‌شود و در volume `app-data` می‌ماند.
+- جدول‌های دیتابیس ساخته می‌شوند (migrate).
+- یک ادمین اولیه ساخته می‌شود:
+
+| | |
+|---|---|
+| آدرس پنل | `https://lms.araz.me/admin/` |
+| نام کاربری (موبایل) | `09120000000` |
+| رمز | `admin12345` |
+
+بعد از اولین ورود، سیستم **اجبار می‌کند رمز را عوض کنید** و تا آن موقع به بخش دیگری دسترسی نمی‌دهد. در پنل می‌توانید شماره موبایل ادمین را هم به شماره خودتان تغییر دهید.
+اولین ورود را بلافاصله بعد از دیپلوی انجام دهید.
+
+### تنظیمات اختیاری
+
+هیچ‌کدام از این‌ها الزامی نیستند. در صورت نیاز در بخش Environment Variables در Coolify تعریف کنید:
+
+| متغیر | پیش‌فرض |
+|---|---|
+| `DJANGO_ADMIN_URL` | `admin/` (مسیر پنل ادمین) |
+| `DJANGO_ALLOWED_HOSTS` | `lms.araz.me,staging.lms.araz.me,localhost,127.0.0.1` |
+| `DJANGO_CSRF_TRUSTED_ORIGINS` | `https://lms.araz.me,https://staging.lms.araz.me` |
+| `DJANGO_SECRET_KEY` | به‌صورت خودکار ساخته می‌شود |
+| `POSTGRES_PASSWORD` | رمز داخلی؛ دیتابیس بیرون از سرور در دسترس نیست. فقط قبل از اولین دیپلوی تغییر دهید |
 
 ### سرویس‌ها
 
 | سرویس | کار |
 |---|---|
-| `web` | Django + gunicorn. migrationها هنگام بالا آمدن خودکار اجرا می‌شوند. health check روی `/health/` |
+| `web` | Django + gunicorn روی پورت 80. migrate و ساخت ادمین هنگام بالا آمدن انجام می‌شود. health check روی `/health/` |
 | `worker` | Celery: تبدیل ویدیو و ارسال پیامک |
 | `db` | PostgreSQL 17 (volume: `postgres-data`) |
 | `redis` | صف Celery |
