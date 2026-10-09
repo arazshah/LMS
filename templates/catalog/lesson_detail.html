@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load fa %}
+{% load fa static %}
 
 {% block title %}{{ lesson.title }} | {{ course.title }}{% endblock %}
 
@@ -13,8 +13,25 @@
     <p class="mt-2 text-sm text-slate-500">{{ lesson.get_kind_display }}{% if lesson.duration_minutes %} · {{ lesson.duration_minutes|fa_num }} دقیقه{% endif %}</p>
 
     {% if can_view %}
-      {% if lesson.kind == "video" %}
-        <div class="mt-6 flex aspect-video items-center justify-center rounded-2xl bg-slate-900 text-slate-400">پخش ویدیو به‌زودی فعال می‌شود.</div>
+      {% if video and video.is_ready %}
+        <div class="mt-6" data-hls-player data-src="{% url 'videos:hls' lesson.pk 'master.m3u8' %}">
+          <div data-stage class="relative aspect-video w-full select-none overflow-hidden rounded-2xl bg-black">
+            <video class="h-full w-full" controls playsinline preload="metadata"
+                   controlslist="nodownload nofullscreen noremoteplayback" disablepictureinpicture></video>
+            <div data-watermark dir="ltr"
+                 class="pointer-events-none absolute z-10 rounded bg-black/20 px-2 py-1 text-xs text-white/60 transition-all duration-1000 sm:text-sm">
+              {{ request.get_host }}{% if user.is_authenticated %} · {{ user.phone }}{% endif %}
+            </div>
+          </div>
+          <div class="mt-2 flex items-center justify-end gap-3 text-sm">
+            <select data-quality hidden class="rounded border border-slate-300 bg-white px-2 py-1" aria-label="کیفیت">
+              <option value="-1">کیفیت خودکار</option>
+            </select>
+            <button type="button" data-fullscreen class="rounded border border-slate-300 bg-white px-3 py-1 hover:border-emerald-600">تمام‌صفحه</button>
+          </div>
+        </div>
+      {% elif video %}
+        <div class="mt-6 flex aspect-video items-center justify-center rounded-2xl bg-slate-900 text-slate-300">ویدیوی این جلسه در حال آماده‌سازی است.</div>
       {% endif %}
 
       {% if lesson.body %}
@@ -59,4 +76,11 @@
     </div>
   </aside>
 </div>
+{% endblock %}
+
+{% block scripts %}
+  {% if can_view and video and video.is_ready %}
+    <script src="{% static 'dist/hls.min.js' %}"></script>
+    <script src="{% static 'js/player.js' %}"></script>
+  {% endif %}
 {% endblock %}

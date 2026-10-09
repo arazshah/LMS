@@ -28,6 +28,8 @@ jobs:
           python-version: "3.13"
           cache: pip
           cache-dependency-path: requirements*.txt
+      - name: Install ffmpeg (video transcoding tests)
+        run: sudo apt-get update -q && sudo apt-get install -y -q ffmpeg
       - run: pip install -r requirements-dev.txt
       - name: Lint
         run: |
@@ -48,3 +50,17 @@ jobs:
         run: >-
           docker run --rm -e DJANGO_SECRET_KEY=ci lms:ci
           python manage.py check --deploy --fail-level ERROR
+      - name: Transcode a sample video with the image's ffmpeg
+        run: |
+          docker run --rm -e DJANGO_SECRET_KEY=ci -e DJANGO_SETTINGS_MODULE=config.settings lms:ci sh -c '
+            ffmpeg -loglevel error -f lavfi -i testsrc2=size=1280x720:rate=25 \
+              -f lavfi -i sine -t 4 -c:v libx264 -c:a aac -shortest /tmp/in.mp4 &&
+            python -c "
+          import django; django.setup()
+          from pathlib import Path
+          from apps.videos.transcode import transcode
+          info, renditions = transcode(Path(\"/tmp/in.mp4\"), Path(\"/tmp/hls\"))
+          assert [r.height for r in renditions] == [720, 480], renditions
+          assert Path(\"/tmp/hls/master.m3u8\").is_file()
+          print(\"transcode ok\", info)
+          "'

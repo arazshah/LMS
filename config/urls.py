@@ -12,6 +12,7 @@ urlpatterns = [
     path(settings.ADMIN_URL, admin.site.urls),
     path("accounts/", include("apps.accounts.urls")),
     path("", include("apps.catalog.urls")),
+    path("", include("apps.videos.urls")),
     path("", include("apps.core.urls")),
     # Only media/public/ (e.g. course covers) is served directly; protected files go
     # through access-checked views.

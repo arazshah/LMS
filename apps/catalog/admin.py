@@ -1,5 +1,5 @@
 from django.contrib import admin
-from django.urls import reverse
+from django.urls import path, reverse
 from django.utils.html import format_html
 
 from .models import Category, Chapter, Course, Enrollment, Lesson, LessonFile
@@ -86,7 +86,8 @@ class LessonFileInline(admin.TabularInline):
 
 @admin.register(Lesson)
 class LessonAdmin(admin.ModelAdmin):
-    list_display = ("title", "chapter", "kind", "is_free", "is_published", "order")
+    change_form_template = "admin/catalog/lesson/change_form.html"
+    list_display = ("title", "chapter", "kind", "video_status", "is_free", "is_published", "order")
     list_filter = ("kind", "is_free", "is_published", "chapter__course")
     search_fields = ("title", "chapter__title", "chapter__course__title")
     list_select_related = ("chapter", "chapter__course")
@@ -102,6 +103,35 @@ class LessonAdmin(admin.ModelAdmin):
         "is_published",
         "order",
     )
+
+    @admin.display(description="ویدیو")
+    def video_status(self, obj):
+        video = getattr(obj, "video", None)
+        return video.get_status_display() if video else "—"
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related("video")
+
+    def get_urls(self):
+        from apps.videos import admin_views as v
+
+        wrap = self.admin_site.admin_view
+        return [
+            path("<int:lesson_id>/video/", wrap(v.upload_page), name="lesson_video_upload"),
+            path("<int:lesson_id>/video/start/", wrap(v.upload_start), name="lesson_video_start"),
+            path("<int:lesson_id>/video/chunk/", wrap(v.upload_chunk), name="lesson_video_chunk"),
+            path(
+                "<int:lesson_id>/video/complete/",
+                wrap(v.upload_complete),
+                name="lesson_video_complete",
+            ),
+            path(
+                "<int:lesson_id>/video/reprocess/",
+                wrap(v.reprocess),
+                name="lesson_video_reprocess",
+            ),
+            *super().get_urls(),
+        ]
 
 
 @admin.register(Enrollment)

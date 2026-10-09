@@ -15,8 +15,10 @@ case "$1" in
     python manage.py ensure_admin
     exec gunicorn config.wsgi:application \
       --bind 0.0.0.0:80 \
-      --workers "${GUNICORN_WORKERS:-3}" \
-      --timeout "${GUNICORN_TIMEOUT:-60}" \
+      --workers "${GUNICORN_WORKERS:-2}" \
+      --worker-class gthread \
+      --threads "${GUNICORN_THREADS:-8}" \
+      --timeout "${GUNICORN_TIMEOUT:-120}" \
       --access-logfile -
     ;;
   worker)

@@ -1,0 +1,26 @@
+{% extends "admin/change_form.html" %}
+
+{% block field_sets %}
+{% if original %}
+  {% with video=original.video %}
+  <fieldset class="module aligned">
+    <h2>ویدیوی جلسه</h2>
+    <div class="form-row" style="padding:12px">
+      {% if video %}
+        <p>وضعیت: <strong>{{ video.get_status_display }}</strong>
+          {% if video.renditions %} — کیفیت‌ها: {{ video.renditions }}{% endif %}
+          {% if video.original_name %} — فایل: <span dir="ltr">{{ video.original_name }}</span>{% endif %}</p>
+        {% if video.status == "failed" %}<p style="color:#ba2121;white-space:pre-wrap">{{ video.error }}</p>{% endif %}
+        {% if video.status == "pending" or video.status == "processing" %}<p>تبدیل ویدیو در پس‌زمینه انجام می‌شود؛ چند دقیقه بعد صفحه را تازه کنید.</p>{% endif %}
+      {% else %}
+        <p>این جلسه هنوز ویدیو ندارد.</p>
+      {% endif %}
+      <p style="margin-top:8px">
+        <a class="button" href="{% url 'admin:lesson_video_upload' original.pk %}">{% if video %}جایگزینی ویدیو{% else %}آپلود ویدیو{% endif %}</a>
+      </p>
+    </div>
+  </fieldset>
+  {% endwith %}
+{% endif %}
+{{ block.super }}
+{% endblock %}

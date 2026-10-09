@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     "apps.core",
     "apps.siteconfig",
     "apps.catalog",
+    "apps.videos",
 ]
 
 MIDDLEWARE = [
@@ -131,6 +132,12 @@ CELERY_BROKER_URL = env("REDIS_URL", default="redis://localhost:6379/0")
 CELERY_RESULT_BACKEND = None
 CELERY_TASK_ALWAYS_EAGER = env.bool("CELERY_TASK_ALWAYS_EAGER", default=False)
 CELERY_TIMEZONE = TIME_ZONE
+# Video transcoding is long-running: only take one task at a time and re-run it
+# if the worker dies mid-way.
+CELERY_TASK_ACKS_LATE = True
+CELERY_TASK_REJECT_ON_WORKER_LOST = True
+CELERY_WORKER_PREFETCH_MULTIPLIER = 1
+CELERY_BROKER_TRANSPORT_OPTIONS = {"visibility_timeout": 4 * 60 * 60}
 
 # Behind Coolify's reverse proxy (Traefik/Caddy), which terminates TLS.
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")

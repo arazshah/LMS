@@ -1,0 +1,105 @@
+{% extends "admin/base_site.html" %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+  <a href="{% url 'admin:index' %}">شروع</a> ›
+  <a href="{% url 'admin:catalog_lesson_changelist' %}">جلسه‌ها</a> ›
+  <a href="{{ lesson_url }}">{{ lesson.title }}</a> › آپلود ویدیو
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="module aligned" style="max-width:720px;padding:16px">
+  <p>دوره: <strong>{{ lesson.chapter.course }}</strong> — جلسه: <strong>{{ lesson.title }}</strong></p>
+  {% if video %}<p style="color:#b45309">این جلسه ویدیو دارد ({{ video.get_status_display }}). آپلود جدید جایگزین آن می‌شود.</p>{% endif %}
+  <p>فرمت‌های مجاز: mp4، mov، mkv، webm. فایل به‌صورت قطعه‌قطعه ارسال می‌شود؛ اگر اینترنت قطع و وصل شود، ارسال خودکار ادامه پیدا می‌کند. تا پایان آپلود این صفحه را نبندید.</p>
+
+  <p><input type="file" id="video-file" accept="video/*,.mkv"></p>
+  <p><button type="button" class="button default" id="start">شروع آپلود</button></p>
+
+  <div id="progress-box" style="display:none;margin-top:16px">
+    <div style="background:#e5e7eb;border-radius:6px;height:22px;overflow:hidden">
+      <div id="bar" style="background:#059669;height:100%;width:0;transition:width .2s"></div>
+    </div>
+    <p id="status" style="margin-top:8px"></p>
+  </div>
+
+  {% if video and video.source %}
+    <form method="post" action="{% url 'admin:lesson_video_reprocess' lesson.pk %}" style="margin-top:24px">
+      {% csrf_token %}
+      <button class="button">تبدیل دوباره ویدیوی فعلی</button>
+    </form>
+  {% endif %}
+</div>
+
+<script>
+(function () {
+  var urls = {
+    start: "{% url 'admin:lesson_video_start' lesson.pk %}",
+    chunk: "{% url 'admin:lesson_video_chunk' lesson.pk %}",
+    complete: "{% url 'admin:lesson_video_complete' lesson.pk %}"
+  };
+  var csrf = document.cookie.match(/csrftoken=([^;]+)/);
+  csrf = csrf ? csrf[1] : "";
+  var input = document.getElementById("video-file"), startBtn = document.getElementById("start");
+  var bar = document.getElementById("bar"), status = document.getElementById("status");
+  var fa = function (n) { return String(n).replace(/\d/g, function (d) { return "۰۱۲۳۴۵۶۷۸۹"[d]; }); };
+  var mb = function (b) { return fa((b / 1048576).toFixed(1)) + " مگابایت"; };
+
+  function post(url, data) {
+    var form = new FormData();
+    Object.keys(data).forEach(function (k) { form.append(k, data[k]); });
+    return fetch(url, { method: "POST", body: form, headers: { "X-CSRFToken": csrf }, credentials: "same-origin" })
+      .then(function (r) {
+        return r.json().catch(function () { return {}; }).then(function (body) {
+          if (!r.ok) { var e = new Error(body.error || ("HTTP " + r.status)); e.fatal = r.status === 400; throw e; }
+          return body;
+        });
+      });
+  }
+
+  function sleep(ms) { return new Promise(function (res) { setTimeout(res, ms); }); }
+
+  async function withRetry(fn, label) {
+    for (var attempt = 1; ; attempt++) {
+      try { return await fn(); }
+      catch (err) {
+        if (err.fatal || attempt >= 8) throw err;
+        status.textContent = label + " — خطای اتصال، تلاش دوباره (" + fa(attempt) + ")...";
+        await sleep(Math.min(30000, 1000 * Math.pow(2, attempt)));
+      }
+    }
+  }
+
+  startBtn.addEventListener("click", async function () {
+    var file = input.files[0];
+    if (!file) { alert("ابتدا فایل ویدیو را انتخاب کنید."); return; }
+    startBtn.disabled = true; input.disabled = true;
+    document.getElementById("progress-box").style.display = "block";
+    window.onbeforeunload = function () { return "آپلود در حال انجام است."; };
+    try {
+      var started = await withRetry(function () { return post(urls.start, { filename: file.name, size: file.size }); }, "شروع");
+      var size = started.chunk_size, total = Math.ceil(file.size / size);
+      for (var i = 0; i < total; i++) {
+        var blob = file.slice(i * size, Math.min(file.size, (i + 1) * size));
+        var label = "ارسال " + mb(Math.min(file.size, (i + 1) * size)) + " از " + mb(file.size);
+        status.textContent = label;
+        await withRetry(function () { return post(urls.chunk, { upload_id: started.upload_id, index: i, chunk: blob }); }, label);
+        bar.style.width = (100 * (i + 1) / total) + "%";
+      }
+      status.textContent = "در حال نهایی‌سازی...";
+      var done = await withRetry(function () {
+        return post(urls.complete, { upload_id: started.upload_id, total_chunks: total, size: file.size, filename: file.name });
+      }, "نهایی‌سازی");
+      window.onbeforeunload = null;
+      window.location = done.redirect;
+    } catch (err) {
+      window.onbeforeunload = null;
+      status.textContent = "آپلود ناموفق بود: " + err.message;
+      status.style.color = "#ba2121";
+      startBtn.disabled = false; input.disabled = false;
+    }
+  });
+})();
+</script>
+{% endblock %}

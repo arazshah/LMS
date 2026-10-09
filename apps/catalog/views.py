@@ -49,7 +49,7 @@ def course_detail(request, slug):
 
 def lesson_detail(request, course_slug, lesson_id):
     lesson = get_object_or_404(
-        Lesson.objects.select_related("chapter__course"),
+        Lesson.objects.select_related("chapter__course", "video"),
         pk=lesson_id,
         is_published=True,
         chapter__course__slug=course_slug,
@@ -73,6 +73,7 @@ def lesson_detail(request, course_slug, lesson_id):
             "course": course,
             "lesson": lesson,
             "can_view": can_view,
+            "video": getattr(lesson, "video", None),
             "chapters": chapters,
             "prev_lesson": lessons[index - 1] if index > 0 else None,
             "next_lesson": lessons[index + 1] if index + 1 < len(lessons) else None,
