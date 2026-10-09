@@ -9,6 +9,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 
 from apps.catalog.models import Course
+from apps.live.models import LiveClass
 from apps.siteconfig.models import SiteSettings
 
 from . import bale, services
@@ -34,7 +35,7 @@ def bundle_detail(request, slug):
 
 
 def _product(kind, slug):
-    model = {"course": Course, "bundle": Bundle}.get(kind)
+    model = {"course": Course, "bundle": Bundle, "live": LiveClass}.get(kind)
     if model is None:
         raise Http404
     return get_object_or_404(model.objects.filter(is_published=True), slug=slug)
@@ -59,7 +60,7 @@ def checkout(request, kind, slug):
         order = services.create_order(request.user, product, code)
         if order.is_paid:
             messages.success(request, "سفارش شما ثبت شد و دسترسی فعال است.")
-            return redirect("catalog:my_courses")
+            return redirect(product.get_absolute_url() if kind == "live" else "catalog:my_courses")
         return redirect(order)
 
     return render(
@@ -114,7 +115,7 @@ def order_status(request, number):
 
 @login_required
 def order_list(request):
-    orders = request.user.orders.select_related("course", "bundle")
+    orders = request.user.orders.select_related("course", "bundle", "live_class")
     return render(request, "shop/order_list.html", {"orders": orders})
 
 

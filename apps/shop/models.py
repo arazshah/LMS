@@ -83,6 +83,12 @@ class DiscountCode(models.Model):
     bundles = models.ManyToManyField(
         Bundle, blank=True, related_name="discount_codes", verbose_name="فقط برای این پکیج‌ها"
     )
+    live_classes = models.ManyToManyField(
+        "live.LiveClass",
+        blank=True,
+        related_name="discount_codes",
+        verbose_name="فقط برای این کلاس‌های زنده",
+    )
     is_active = models.BooleanField("فعال", default=True)
     created_at = models.DateTimeField("ایجاد", auto_now_add=True)
 
@@ -142,6 +148,10 @@ class Order(models.Model):
         Bundle, on_delete=models.PROTECT, null=True, blank=True, related_name="orders",
         verbose_name="پکیج",
     )  # fmt: skip
+    live_class = models.ForeignKey(
+        "live.LiveClass", on_delete=models.PROTECT, null=True, blank=True, related_name="orders",
+        verbose_name="کلاس زنده",
+    )  # fmt: skip
     title = models.CharField("عنوان", max_length=200)
     amount = models.PositiveIntegerField("مبلغ (تومان)")
     discount_code = models.ForeignKey(
@@ -168,8 +178,11 @@ class Order(models.Model):
         ordering = ["-created_at"]
         constraints = [
             models.CheckConstraint(
-                condition=models.Q(course__isnull=False, bundle__isnull=True)
-                | models.Q(course__isnull=True, bundle__isnull=False),
+                condition=models.Q(
+                    course__isnull=False, bundle__isnull=True, live_class__isnull=True
+                )
+                | models.Q(course__isnull=True, bundle__isnull=False, live_class__isnull=True)
+                | models.Q(course__isnull=True, bundle__isnull=True, live_class__isnull=False),
                 name="order_has_exactly_one_product",
             )
         ]
@@ -188,7 +201,15 @@ class Order(models.Model):
 
     @property
     def product(self):
-        return self.course or self.bundle
+        return self.course or self.bundle or self.live_class
+
+    @property
+    def product_kind_label(self):
+        if self.bundle_id:
+            return "پکیج"
+        if self.live_class_id:
+            return "کلاس زنده"
+        return "دوره"
 
     @property
     def is_paid(self):

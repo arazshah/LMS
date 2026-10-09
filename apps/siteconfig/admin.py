@@ -12,7 +12,14 @@ class SiteSettingsAdmin(admin.ModelAdmin):
         (
             "پیامک (sms.ir)",
             {
-                "fields": ("sms_api_key", "sms_otp_template_id", "sms_otp_param_name"),
+                "fields": (
+                    "sms_api_key",
+                    "sms_otp_template_id",
+                    "sms_otp_param_name",
+                    "sms_paid_template_id",
+                    "sms_rejected_template_id",
+                    "sms_reminder_template_id",
+                ),
                 "description": (
                     "برای ورود دانشجوها با کد پیامکی لازم است. در sms.ir یک قالب «ارسال سریع» "
                     "با متنی مثل «کد ورود شما: #CODE#» بسازید و شناسه‌اش را اینجا وارد کنید."

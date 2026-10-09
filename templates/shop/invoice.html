@@ -38,7 +38,7 @@
 
   <table>
     <tr><th>شرح</th><th style="width:35%">مبلغ</th></tr>
-    <tr><td>{% if order.bundle_id %}پکیج{% else %}دوره{% endif %}: {{ order.title }}</td><td>{{ order.amount|toman }}</td></tr>
+    <tr><td>{{ order.product_kind_label }}: {{ order.title }}</td><td>{{ order.amount|toman }}</td></tr>
     {% if order.discount_amount %}<tr><td>تخفیف{% if order.discount_code %} ({{ order.discount_code.code }}){% endif %}</td><td>{{ order.discount_amount|toman }}</td></tr>{% endif %}
     <tr class="total"><td>مبلغ پرداخت‌شده</td><td>{{ order.total|toman }}</td></tr>
   </table>

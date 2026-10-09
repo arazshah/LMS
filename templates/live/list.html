@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block title %}کلاس‌های زنده | {{ site.site_name }}{% endblock %}
+
+{% block content %}
+<h1 class="mb-6 text-2xl font-extrabold">کلاس‌های زنده</h1>
+{% if classes %}
+  <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+    {% for live_class in classes %}{% include "live/_card.html" %}{% endfor %}
+  </div>
+{% else %}
+  <p class="rounded-2xl bg-white p-8 text-center text-slate-500 ring-1 ring-slate-200">کلاس زنده‌ای برنامه‌ریزی نشده است.</p>
+{% endif %}
+{% endblock %}

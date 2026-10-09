@@ -1,0 +1,16 @@
+{% load fa %}
+<a href="{{ live_class.get_absolute_url }}" class="group flex flex-col overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200 transition hover:shadow-md">
+  {% if live_class.cover %}
+    <img src="{{ live_class.cover.url }}" alt="{{ live_class.title }}" class="aspect-video w-full object-cover">
+  {% else %}
+    <div class="flex aspect-video w-full items-center justify-center bg-gradient-to-br from-rose-600 to-orange-700 p-4 text-center text-lg font-bold text-white">{{ live_class.title }}</div>
+  {% endif %}
+  <div class="flex flex-1 flex-col p-5">
+    <span class="mb-2 w-fit rounded-full bg-rose-50 px-2 py-1 text-xs text-rose-700">● کلاس زنده</span>
+    <h3 class="font-bold text-slate-900 group-hover:text-emerald-700">{{ live_class.title }}</h3>
+    {% with session=live_class.next_session %}
+      <p class="mt-2 text-sm text-slate-600">{% if session %}جلسه بعدی: {{ session.starts_at|jdate:"%Y/%m/%d — %H:%M" }}{% else %}زمان‌بندی به‌زودی{% endif %}</p>
+    {% endwith %}
+    <p class="mt-auto pt-4 text-sm font-bold text-slate-900">{{ live_class.price|toman }}</p>
+  </div>
+</a>

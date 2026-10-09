@@ -34,7 +34,9 @@ def _hash(phone: str, code: str) -> str:
 
 
 def seconds_until_resend(phone: str) -> int:
-    last = OTPCode.objects.filter(phone=phone).order_by("-created_at").first()
+    # Only an unused code blocks a new one; after a successful login the user can
+    # immediately request a fresh code (e.g. to sign in on another device).
+    last = OTPCode.objects.filter(phone=phone, used=False).order_by("-created_at").first()
     if not last:
         return 0
     remaining = (last.created_at + RESEND_COOLDOWN - timezone.now()).total_seconds()

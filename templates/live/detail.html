@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% load fa %}
+
+{% block title %}{{ live_class.title }} | {{ site.site_name }}{% endblock %}
+
+{% block content %}
+<div class="grid gap-8 lg:grid-cols-3">
+  <div class="lg:col-span-2">
+    <nav class="mb-3 text-sm text-slate-500"><a href="{% url 'live:list' %}" class="hover:text-emerald-700">کلاس‌های زنده</a></nav>
+    <h1 class="text-3xl font-extrabold text-slate-900">{{ live_class.title }}</h1>
+    {% if live_class.summary %}<p class="mt-3 text-lg text-slate-600">{{ live_class.summary }}</p>{% endif %}
+    {% if live_class.description %}<div class="mt-6 leading-8 text-slate-700">{{ live_class.description|linebreaks }}</div>{% endif %}
+
+    <h2 class="mb-4 mt-10 text-xl font-bold">برنامه جلسه‌ها</h2>
+    <ul class="divide-y divide-slate-100 overflow-hidden rounded-xl bg-white ring-1 ring-slate-200">
+      {% for session in sessions %}
+        <li class="flex flex-wrap items-center justify-between gap-3 px-5 py-4 {% if session.is_over %}text-slate-400{% endif %}">
+          <div>
+            <p class="font-bold">{{ session.title }}</p>
+            <p class="mt-1 text-sm">{{ session.starts_at|jdate:"%Y/%m/%d — ساعت %H:%M" }} · {{ session.duration_minutes|fa_num }} دقیقه</p>
+            {% if registered and session.notes %}<p class="mt-1 text-sm text-slate-600">{{ session.notes }}</p>{% endif %}
+          </div>
+          {% if registered %}
+            {% if session.is_joinable %}
+              <a href="{{ session.meet_link }}" target="_blank" rel="noopener" class="rounded-lg bg-rose-600 px-5 py-2 font-bold text-white hover:bg-rose-700">ورود به کلاس</a>
+            {% elif session.is_over %}
+              <span class="text-sm">برگزار شد</span>
+            {% else %}
+              <span class="text-xs text-slate-500">لینک ورود ۱۵ دقیقه قبل از شروع اینجا نمایش داده می‌شود</span>
+            {% endif %}
+          {% endif %}
+        </li>
+      {% empty %}
+        <li class="px-5 py-4 text-slate-500">زمان‌بندی جلسه‌ها به‌زودی اعلام می‌شود.</li>
+      {% endfor %}
+    </ul>
+  </div>
+
+  <aside class="lg:sticky lg:top-6 lg:self-start">
+    <div class="space-y-3 rounded-2xl bg-white p-5 text-sm shadow-sm ring-1 ring-slate-200">
+      <div class="flex justify-between text-base font-bold"><span>قیمت</span><span>{{ live_class.price|toman }}</span></div>
+      {% if live_class.capacity %}
+        <div class="flex justify-between"><span class="text-slate-500">ظرفیت باقی‌مانده</span><span>{{ live_class.seats_left|fa_num }} نفر</span></div>
+      {% endif %}
+      {% if registered %}
+        <div class="rounded-lg bg-emerald-50 p-3 text-emerald-800">شما در این کلاس ثبت‌نام کرده‌اید. یادآوری جلسه‌ها پیامک می‌شود.</div>
+      {% elif live_class.is_full %}
+        <div class="rounded-lg bg-slate-100 p-3 text-slate-700">ظرفیت این کلاس تکمیل شده است.</div>
+      {% else %}
+        <a href="{% url 'shop:checkout' 'live' live_class.slug %}" class="block rounded-lg bg-rose-600 py-3 text-center font-bold text-white hover:bg-rose-700">ثبت‌نام در کلاس</a>
+      {% endif %}
+    </div>
+  </aside>
+</div>
+{% endblock %}

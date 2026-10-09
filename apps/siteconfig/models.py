@@ -38,6 +38,25 @@ class SiteSettings(models.Model):
         "نام پارامتر کد در قالب", max_length=50, default="CODE", help_text="مثلاً CODE برای #CODE#"
     )
 
+    sms_paid_template_id = models.PositiveIntegerField(
+        "قالب پیامک «پرداخت تأیید شد»",
+        null=True,
+        blank=True,
+        help_text="پارامترها: #ORDER# (شماره سفارش) و #TITLE# (نام محصول). خالی = ارسال نشود",
+    )
+    sms_rejected_template_id = models.PositiveIntegerField(
+        "قالب پیامک «رسید تأیید نشد»",
+        null=True,
+        blank=True,
+        help_text="پارامتر: #ORDER# (شماره سفارش). خالی = ارسال نشود",
+    )
+    sms_reminder_template_id = models.PositiveIntegerField(
+        "قالب پیامک «یادآوری کلاس زنده»",
+        null=True,
+        blank=True,
+        help_text="پارامترها: #TITLE# (نام کلاس) و #TIME# (تاریخ و ساعت). خالی = ارسال نشود",
+    )
+
     card_number = models.CharField(
         "شماره کارت (کارت‌به‌کارت)", max_length=30, blank=True, help_text="به خریدار نمایش داده می‌شود"
     )

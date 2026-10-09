@@ -7,6 +7,8 @@ from django.db import transaction
 from django.utils import timezone
 
 from apps.catalog.models import Course, Enrollment
+from apps.live.models import LiveClass, LiveRegistration
+from apps.notify import tasks as notify
 
 from .models import Bundle, DiscountCode, Order
 
@@ -31,6 +33,8 @@ def _product_fields(product):
         return {"course": product}
     if isinstance(product, Bundle):
         return {"bundle": product}
+    if isinstance(product, LiveClass):
+        return {"live_class": product}
     raise TypeError(product)
 
 
@@ -45,6 +49,11 @@ def check_can_buy(user, product) -> None:
         )
         if unlimited.exists():
             raise ShopError("شما دسترسی دائمی به این دوره دارید.")
+    if isinstance(product, LiveClass):
+        if product.registrations.filter(user=user).exists():
+            raise ShopError("شما قبلاً در این کلاس ثبت‌نام کرده‌اید.")
+        if product.is_full:
+            raise ShopError("ظرفیت این کلاس تکمیل شده است.")
 
 
 def validate_code(raw_code: str, user, product) -> DiscountCode:
@@ -60,14 +69,10 @@ def validate_code(raw_code: str, user, product) -> DiscountCode:
         raise ShopError("ظرفیت استفاده از این کد تخفیف تمام شده است.")
     if code.one_per_user and code.orders.filter(user=user, status=Order.Status.PAID).exists():
         raise ShopError("شما قبلاً از این کد تخفیف استفاده کرده‌اید.")
-    restricted = code.courses.exists() or code.bundles.exists()
+    restricted = code.courses.exists() or code.bundles.exists() or code.live_classes.exists()
     if restricted:
-        allowed = (
-            code.courses.filter(pk=product.pk).exists()
-            if isinstance(product, Course)
-            else code.bundles.filter(pk=product.pk).exists()
-        )
-        if not allowed:
+        related = {Course: code.courses, Bundle: code.bundles, LiveClass: code.live_classes}
+        if not related[type(product)].filter(pk=product.pk).exists():
             raise ShopError("این کد تخفیف برای این محصول قابل استفاده نیست.")
     if product.price < code.min_amount:
         raise ShopError("مبلغ خرید برای استفاده از این کد کافی نیست.")
@@ -125,6 +130,8 @@ def mark_paid(order: Order, method: str, ref: str = "") -> bool:
     """
     changed = _mark_paid(order.pk, method, ref)
     order.refresh_from_db()
+    if changed and order.payment_method != Order.Method.FREE:
+        notify.order_paid(order)
     return changed
 
 
@@ -143,6 +150,11 @@ def _mark_paid(order_pk: int, method: str, ref: str) -> bool:
 
     if order.course_id:
         grant_access(order.user, order.course, order.course.access_days, order)
+    elif order.live_class_id:
+        # Payment already received: register even if capacity filled up meanwhile.
+        LiveRegistration.objects.get_or_create(
+            user=order.user, live_class=order.live_class, defaults={"order": order}
+        )
     else:
         bundle = order.bundle
         for course in bundle.courses.all():
@@ -157,3 +169,4 @@ def reject_receipt(order: Order, note: str = "") -> None:
     order.status = Order.Status.REJECTED
     order.admin_note = note or order.admin_note
     order.save(update_fields=["status", "admin_note", "updated_at"])
+    notify.receipt_rejected(order)

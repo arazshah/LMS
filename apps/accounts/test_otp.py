@@ -224,3 +224,14 @@ def test_sms_not_configured_logs_code_in_debug(settings, caplog):
     settings.DEBUG = True
     send_otp(PHONE, "12345")
     assert "12345" in caplog.text
+
+
+@pytest.mark.django_db
+def test_used_code_does_not_block_a_new_login(client, sent_codes):
+    _login_until_verify(client)
+    client.post(reverse("accounts:verify"), {"code": sent_codes[0]})
+    client.post(reverse("accounts:logout"))
+    _login_until_verify(client)
+    assert len(sent_codes) == 2
+    client.post(reverse("accounts:verify"), {"code": sent_codes[1]})
+    assert "_auth_user_id" in client.session

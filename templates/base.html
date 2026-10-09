@@ -14,6 +14,7 @@
       <nav class="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm">
         <a href="{% url 'catalog:course_list' %}" class="hover:text-emerald-700">دوره‌ها</a>
         <a href="{% url 'shop:bundle_list' %}" class="hover:text-emerald-700">پکیج‌ها</a>
+        <a href="{% url 'live:list' %}" class="hover:text-emerald-700">کلاس زنده</a>
         {% if user.is_authenticated %}
           <a href="{% url 'catalog:my_courses' %}" class="hover:text-emerald-700">دوره‌های من</a>
           <a href="{% url 'shop:order_list' %}" class="hover:text-emerald-700">سفارش‌ها</a>

@@ -5,12 +5,18 @@ from django.shortcuts import render
 from django.views.static import serve
 
 from apps.catalog.models import Category, Course
+from apps.live.models import LiveClass
 
 
 def home(request):
     courses = Course.objects.filter(is_published=True).select_related("category")[:6]
     categories = Category.objects.filter(courses__is_published=True).distinct()
-    return render(request, "core/home.html", {"courses": courses, "categories": categories})
+    live_classes = LiveClass.objects.filter(is_published=True).prefetch_related("sessions")[:3]
+    return render(
+        request,
+        "core/home.html",
+        {"courses": courses, "categories": categories, "live_classes": live_classes},
+    )
 
 
 def health(request):

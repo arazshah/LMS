@@ -47,6 +47,8 @@ INSTALLED_APPS = [
     "apps.catalog",
     "apps.videos",
     "apps.shop",
+    "apps.live",
+    "apps.notify",
 ]
 
 MIDDLEWARE = [
@@ -139,6 +141,12 @@ CELERY_TASK_ACKS_LATE = True
 CELERY_TASK_REJECT_ON_WORKER_LOST = True
 CELERY_WORKER_PREFETCH_MULTIPLIER = 1
 CELERY_BROKER_TRANSPORT_OPTIONS = {"visibility_timeout": 4 * 60 * 60}
+CELERY_BEAT_SCHEDULE = {
+    "live-class-reminders": {
+        "task": "apps.notify.tasks.send_live_reminders",
+        "schedule": 5 * 60,
+    },
+}
 
 # Behind Coolify's reverse proxy (Traefik/Caddy), which terminates TLS.
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")

@@ -14,6 +14,7 @@ urlpatterns = [
     path("", include("apps.catalog.urls")),
     path("", include("apps.videos.urls")),
     path("", include("apps.shop.urls")),
+    path("", include("apps.live.urls")),
     path("", include("apps.core.urls")),
     # Only media/public/ (e.g. course covers) is served directly; protected files go
     # through access-checked views.

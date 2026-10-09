@@ -6,7 +6,7 @@
 {% block content %}
 <h1 class="mb-6 text-2xl font-extrabold">دوره‌های من</h1>
 
-{% if active %}
+{% if active or live %}{% if active %}
   <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
     {% for enrollment in active %}
       <a href="{{ enrollment.course.get_absolute_url }}" class="rounded-2xl bg-white p-5 ring-1 ring-slate-200 hover:ring-emerald-500">
@@ -15,10 +15,24 @@
       </a>
     {% endfor %}
   </div>
-{% else %}
+{% endif %}{% else %}
   <div class="rounded-2xl bg-white p-8 text-center ring-1 ring-slate-200">
     <p class="text-slate-600">هنوز دوره‌ای ندارید.</p>
     <a href="{% url 'catalog:course_list' %}" class="mt-4 inline-block rounded-lg bg-emerald-600 px-6 py-3 font-bold text-white hover:bg-emerald-700">مشاهده دوره‌ها</a>
+  </div>
+{% endif %}
+
+{% if live %}
+  <h2 class="mb-4 mt-10 text-lg font-bold">کلاس‌های زنده من</h2>
+  <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    {% for live_class in live %}
+      <a href="{{ live_class.get_absolute_url }}" class="rounded-2xl bg-white p-5 ring-1 ring-slate-200 hover:ring-rose-500">
+        <h3 class="font-bold">{{ live_class.title }}</h3>
+        {% with session=live_class.next_session %}
+          <p class="mt-2 text-sm text-slate-500">{% if session %}جلسه بعدی: {{ session.starts_at|jdate:"%Y/%m/%d — %H:%M" }}{% else %}جلسه آینده‌ای ندارد{% endif %}</p>
+        {% endwith %}
+      </a>
+    {% endfor %}
   </div>
 {% endif %}
 

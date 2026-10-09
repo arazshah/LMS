@@ -6,7 +6,7 @@
 {% block content %}
 <div class="mx-auto max-w-lg rounded-2xl bg-white p-8 shadow-sm ring-1 ring-slate-200">
   <h1 class="text-2xl font-extrabold">تکمیل خرید</h1>
-  <p class="mt-2 text-slate-600">{% if kind == "bundle" %}پکیج{% else %}دوره{% endif %}: <a href="{{ product.get_absolute_url }}" class="font-bold text-emerald-700">{{ product.title }}</a></p>
+  <p class="mt-2 text-slate-600">{% if kind == "bundle" %}پکیج{% elif kind == "live" %}کلاس زنده{% else %}دوره{% endif %}: <a href="{{ product.get_absolute_url }}" class="font-bold text-emerald-700">{{ product.title }}</a></p>
 
   {% if error %}<div class="mt-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-800">{{ error }}</div>{% endif %}
 

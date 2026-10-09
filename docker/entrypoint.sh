@@ -22,7 +22,10 @@ case "$1" in
       --access-logfile -
     ;;
   worker)
-    exec celery -A config worker --loglevel=info --concurrency "${CELERY_CONCURRENCY:-2}"
+    # -B runs the beat scheduler (class reminders) inside this single worker.
+    exec celery -A config worker -B --loglevel=info \
+      --concurrency "${CELERY_CONCURRENCY:-2}" \
+      --schedule "$DATA_DIR/celerybeat-schedule"
     ;;
   *)
     exec "$@"

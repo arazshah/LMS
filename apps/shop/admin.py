@@ -27,14 +27,14 @@ class DiscountCodeAdmin(admin.ModelAdmin):
     list_display = ("code", "kind", "value", "valid_until", "uses", "is_active")
     list_filter = ("is_active", "kind")
     search_fields = ("code",)
-    filter_horizontal = ("courses", "bundles")
+    filter_horizontal = ("courses", "bundles", "live_classes")
     fieldsets = (
         (None, {"fields": ("code", "kind", "value", "max_discount", "is_active")}),
         (
             "محدودیت‌ها",
             {"fields": ("min_amount", "valid_from", "valid_until", "max_uses", "one_per_user")},
         ),  # fmt: skip
-        ("محصولات مجاز", {"fields": ("courses", "bundles")}),
+        ("محصولات مجاز", {"fields": ("courses", "bundles", "live_classes")}),
     )
 
     @admin.display(description="تعداد استفاده")
@@ -53,13 +53,13 @@ class OrderAdmin(admin.ModelAdmin):
     date_hierarchy = "created_at"
     actions = ["approve", "reject"]
     readonly_fields = (
-        "number", "user", "title", "course", "bundle", "amount", "discount_code",
+        "number", "user", "title", "course", "bundle", "live_class", "amount", "discount_code",
         "discount_amount", "total", "status", "payment_method", "payment_ref",
         "receipt_preview", "receipt_ref", "receipt_submitted_at", "bale_chat_id", "paid_at",
         "created_at", "access_list",
     )  # fmt: skip
     fieldsets = (
-        (None, {"fields": ("number", "user", "title", "course", "bundle", "status")}),
+        (None, {"fields": ("number", "user", "title", "course", "bundle", "live_class", "status")}),
         ("مبلغ", {"fields": ("amount", "discount_code", "discount_amount", "total")}),
         (
             "پرداخت",

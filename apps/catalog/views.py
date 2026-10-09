@@ -117,4 +117,12 @@ def my_courses(request):
         if enrollment.course_id not in seen:
             seen.add(enrollment.course_id)
             expired.append(enrollment)
-    return render(request, "catalog/my_courses.html", {"active": active, "expired": expired})
+    live = [
+        r.live_class
+        for r in request.user.live_registrations.select_related("live_class").prefetch_related(
+            "live_class__sessions"
+        )
+    ]
+    return render(
+        request, "catalog/my_courses.html", {"active": active, "expired": expired, "live": live}
+    )
