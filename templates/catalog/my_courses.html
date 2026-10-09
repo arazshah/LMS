@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% load fa %}
+
+{% block title %}دوره‌های من | {{ site.site_name }}{% endblock %}
+
+{% block content %}
+<h1 class="mb-6 text-2xl font-extrabold">دوره‌های من</h1>
+
+{% if active %}
+  <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    {% for enrollment in active %}
+      <a href="{{ enrollment.course.get_absolute_url }}" class="rounded-2xl bg-white p-5 ring-1 ring-slate-200 hover:ring-emerald-500">
+        <h2 class="font-bold">{{ enrollment.course.title }}</h2>
+        <p class="mt-2 text-sm text-slate-500">{% if enrollment.expires_at %}دسترسی تا {{ enrollment.expires_at|jdate }}{% else %}دسترسی دائمی{% endif %}</p>
+      </a>
+    {% endfor %}
+  </div>
+{% else %}
+  <div class="rounded-2xl bg-white p-8 text-center ring-1 ring-slate-200">
+    <p class="text-slate-600">هنوز دوره‌ای ندارید.</p>
+    <a href="{% url 'catalog:course_list' %}" class="mt-4 inline-block rounded-lg bg-emerald-600 px-6 py-3 font-bold text-white hover:bg-emerald-700">مشاهده دوره‌ها</a>
+  </div>
+{% endif %}
+
+{% if expired %}
+  <h2 class="mb-4 mt-10 text-lg font-bold text-slate-500">دسترسی‌های منقضی‌شده</h2>
+  <ul class="space-y-2 text-sm text-slate-500">
+    {% for enrollment in expired %}
+      <li><a href="{{ enrollment.course.get_absolute_url }}" class="hover:text-emerald-700">{{ enrollment.course.title }}</a> — پایان: {{ enrollment.expires_at|jdate }}</li>
+    {% endfor %}
+  </ul>
+{% endif %}
+{% endblock %}

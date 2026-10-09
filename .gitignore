@@ -10,3 +10,4 @@ node_modules/
 .ruff_cache/
 db.sqlite3
 /data/
+.test-media/

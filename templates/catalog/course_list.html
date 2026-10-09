@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block title %}دوره‌ها | {{ site.site_name }}{% endblock %}
+
+{% block content %}
+<h1 class="mb-6 text-2xl font-extrabold">{% if current_category %}دوره‌های {{ current_category.title }}{% else %}همه دوره‌ها{% endif %}</h1>
+
+{% if categories %}
+<div class="mb-8 flex flex-wrap gap-2">
+  <a href="{% url 'catalog:course_list' %}" class="rounded-full px-4 py-2 text-sm ring-1 {% if not current_category %}bg-emerald-600 text-white ring-emerald-600{% else %}bg-white ring-slate-200 hover:ring-emerald-500{% endif %}">همه</a>
+  {% for category in categories %}
+    <a href="?category={{ category.slug|urlencode }}" class="rounded-full px-4 py-2 text-sm ring-1 {% if current_category == category %}bg-emerald-600 text-white ring-emerald-600{% else %}bg-white ring-slate-200 hover:ring-emerald-500{% endif %}">{{ category.title }}</a>
+  {% endfor %}
+</div>
+{% endif %}
+
+{% if courses %}
+  <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+    {% for course in courses %}{% include "catalog/_course_card.html" %}{% endfor %}
+  </div>
+{% else %}
+  <p class="rounded-2xl bg-white p-8 text-center text-slate-500 ring-1 ring-slate-200">دوره‌ای پیدا نشد.</p>
+{% endif %}
+{% endblock %}

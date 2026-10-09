@@ -1,0 +1,17 @@
+{% load fa %}
+<a href="{{ course.get_absolute_url }}" class="group flex flex-col overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200 transition hover:shadow-md">
+  {% if course.cover %}
+    <img src="{{ course.cover.url }}" alt="{{ course.title }}" class="aspect-video w-full object-cover">
+  {% else %}
+    <div class="flex aspect-video w-full items-center justify-center bg-gradient-to-br from-emerald-600 to-teal-800 p-4 text-center text-lg font-bold text-white">{{ course.title }}</div>
+  {% endif %}
+  <div class="flex flex-1 flex-col p-5">
+    <div class="mb-2 flex items-center gap-2 text-xs">
+      <span class="rounded-full bg-slate-100 px-2 py-1 text-slate-600">{{ course.category }}</span>
+      <span class="rounded-full bg-emerald-50 px-2 py-1 text-emerald-700">{{ course.get_level_display }}</span>
+    </div>
+    <h3 class="font-bold text-slate-900 group-hover:text-emerald-700">{{ course.title }}</h3>
+    {% if course.summary %}<p class="mt-2 line-clamp-2 text-sm text-slate-600">{{ course.summary }}</p>{% endif %}
+    <p class="mt-auto pt-4 text-sm font-bold text-slate-900">{{ course.price|toman }}</p>
+  </div>
+</a>

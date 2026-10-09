@@ -20,3 +20,14 @@ def test_home_renders_rtl_persian_page(client):
 def test_admin_login_page_is_available(client, settings):
     response = client.get(f"/{settings.ADMIN_URL}login/")
     assert response.status_code == 200
+
+
+def test_persian_filters():
+    from datetime import date
+
+    from apps.core.templatetags.fa import fa_num, jdate, toman
+
+    assert fa_num(120) == "۱۲۰"
+    assert toman(1500000) == "۱٬۵۰۰٬۰۰۰ تومان"
+    assert toman(0) == "رایگان"
+    assert jdate(date(2026, 3, 21)) == "۱۴۰۵/۰۱/۰۱"

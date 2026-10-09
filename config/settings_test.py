@@ -10,3 +10,5 @@ STORAGES["staticfiles"] = {  # noqa: F405
     "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"
 }
 WHITENOISE_AUTOREFRESH = True
+CACHES = {"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}}
+MEDIA_ROOT = BASE_DIR / ".test-media"  # noqa: F405

@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% load fa %}
+
+{% block title %}کد تأیید | {{ site.site_name }}{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-md rounded-2xl bg-white p-8 shadow-sm ring-1 ring-slate-200">
+  <h1 class="text-2xl font-extrabold">کد تأیید</h1>
+  <p class="mt-2 text-sm text-slate-600">کد ارسال‌شده به <span dir="ltr" class="font-bold">{{ phone|fa_num }}</span> را وارد کنید.
+    <a href="{% url 'accounts:login' %}" class="text-emerald-700 hover:underline">تغییر شماره</a></p>
+  <form method="post" class="mt-6 space-y-4">
+    {% csrf_token %}
+    {% include "accounts/_errors.html" %}
+    {{ form.code }}
+    {% for error in form.code.errors %}<p class="text-sm text-red-600">{{ error }}</p>{% endfor %}
+    <button class="w-full rounded-lg bg-emerald-600 py-3 font-bold text-white hover:bg-emerald-700">ورود</button>
+  </form>
+  <form method="post" class="mt-4 text-center text-sm">
+    {% csrf_token %}
+    <input type="hidden" name="action" value="resend">
+    <button id="resend" class="text-emerald-700 hover:underline disabled:text-slate-400 disabled:no-underline" {% if wait_seconds %}disabled{% endif %}>ارسال مجدد کد</button>
+    <span id="countdown" class="text-slate-400" data-seconds="{{ wait_seconds }}"></span>
+  </form>
+</div>
+<script>
+  (function () {
+    var el = document.getElementById("countdown"), btn = document.getElementById("resend");
+    var left = parseInt(el.dataset.seconds, 10) || 0;
+    var fa = function (n) { return String(n).replace(/\d/g, function (d) { return "۰۱۲۳۴۵۶۷۸۹"[d]; }); };
+    function tick() {
+      if (left <= 0) { el.textContent = ""; btn.disabled = false; return; }
+      el.textContent = "(" + fa(left) + " ثانیه)"; left -= 1; setTimeout(tick, 1000);
+    }
+    tick();
+  })();
+</script>
+{% endblock %}

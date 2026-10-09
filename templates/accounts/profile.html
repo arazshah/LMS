@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% load fa %}
+
+{% block title %}مشخصات من | {{ site.site_name }}{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-md rounded-2xl bg-white p-8 shadow-sm ring-1 ring-slate-200">
+  <h1 class="text-2xl font-extrabold">مشخصات من</h1>
+  <p class="mt-2 text-sm text-slate-600">موبایل: <span dir="ltr">{{ user.phone|fa_num }}</span></p>
+  <form method="post" class="mt-6 space-y-4">
+    {% csrf_token %}
+    {% include "accounts/_errors.html" %}
+    {% for field in form %}
+      <div>
+        <label class="mb-1 block text-sm font-medium" for="{{ field.id_for_label }}">{{ field.label }}</label>
+        {{ field }}
+        {% for error in field.errors %}<p class="mt-1 text-sm text-red-600">{{ error }}</p>{% endfor %}
+      </div>
+    {% endfor %}
+    <button class="w-full rounded-lg bg-emerald-600 py-3 font-bold text-white hover:bg-emerald-700">ذخیره</button>
+  </form>
+</div>
+{% endblock %}

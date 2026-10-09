@@ -1,10 +1,31 @@
 {% extends "base.html" %}
 
 {% block content %}
-<section class="rounded-2xl bg-white p-10 text-center shadow-sm">
-  <h1 class="text-3xl font-extrabold text-slate-900">آموزش هوش مصنوعی مکانی</h1>
-  <p class="mt-4 text-slate-600">
-    دوره‌های تخصصی GeoAI، سنجش از دور و تحلیل داده‌های مکانی — به‌زودی.
-  </p>
+<section class="rounded-2xl bg-gradient-to-br from-emerald-700 to-teal-900 px-6 py-14 text-center text-white">
+  <h1 class="text-3xl font-extrabold md:text-4xl">{{ site.site_name }}</h1>
+  {% if site.tagline %}<p class="mx-auto mt-4 max-w-2xl text-emerald-50">{{ site.tagline }}</p>{% endif %}
+  <a href="{% url 'catalog:course_list' %}" class="mt-8 inline-block rounded-lg bg-white px-6 py-3 font-bold text-emerald-800 hover:bg-emerald-50">مشاهده دوره‌ها</a>
+</section>
+
+{% if categories %}
+<section class="mt-10">
+  <h2 class="mb-4 text-xl font-bold">دسته‌بندی‌ها</h2>
+  <div class="flex flex-wrap gap-2">
+    {% for category in categories %}
+      <a href="{% url 'catalog:course_list' %}?category={{ category.slug|urlencode }}" class="rounded-full bg-white px-4 py-2 text-sm ring-1 ring-slate-200 hover:ring-emerald-500">{{ category.title }}</a>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+<section class="mt-10">
+  <h2 class="mb-4 text-xl font-bold">جدیدترین دوره‌ها</h2>
+  {% if courses %}
+    <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      {% for course in courses %}{% include "catalog/_course_card.html" %}{% endfor %}
+    </div>
+  {% else %}
+    <p class="rounded-2xl bg-white p-8 text-center text-slate-500 ring-1 ring-slate-200">دوره‌ها به‌زودی منتشر می‌شوند.</p>
+  {% endif %}
 </section>
 {% endblock %}

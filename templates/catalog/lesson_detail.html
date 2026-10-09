@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% load fa %}
+
+{% block title %}{{ lesson.title }} | {{ course.title }}{% endblock %}
+
+{% block content %}
+<div class="grid gap-8 lg:grid-cols-4">
+  <article class="lg:col-span-3">
+    <nav class="mb-3 text-sm text-slate-500">
+      <a href="{{ course.get_absolute_url }}" class="hover:text-emerald-700">{{ course.title }}</a> / {{ lesson.chapter.title }}
+    </nav>
+    <h1 class="text-2xl font-extrabold text-slate-900">{{ lesson.title }}</h1>
+    <p class="mt-2 text-sm text-slate-500">{{ lesson.get_kind_display }}{% if lesson.duration_minutes %} · {{ lesson.duration_minutes|fa_num }} دقیقه{% endif %}</p>
+
+    {% if can_view %}
+      {% if lesson.kind == "video" %}
+        <div class="mt-6 flex aspect-video items-center justify-center rounded-2xl bg-slate-900 text-slate-400">پخش ویدیو به‌زودی فعال می‌شود.</div>
+      {% endif %}
+
+      {% if lesson.body %}
+        <div class="mt-6 rounded-2xl bg-white p-6 leading-8 ring-1 ring-slate-200">{{ lesson.body|linebreaks }}</div>
+      {% endif %}
+
+      {% with files=lesson.files.all %}
+        {% if files %}
+          <section class="mt-6 rounded-2xl bg-white p-6 ring-1 ring-slate-200">
+            <h2 class="mb-3 font-bold">فایل‌ها</h2>
+            <ul class="space-y-2">
+              {% for item in files %}
+                <li><a href="{{ item.get_absolute_url }}" class="text-emerald-700 hover:underline">⬇ {{ item.title }}</a> <span class="text-xs text-slate-400" dir="ltr">{{ item.filename }}</span></li>
+              {% endfor %}
+            </ul>
+          </section>
+        {% endif %}
+      {% endwith %}
+    {% else %}
+      <div class="mt-6 rounded-2xl bg-white p-8 text-center ring-1 ring-slate-200">
+        <p class="text-lg font-bold">🔒 این جلسه فقط برای دانشجویان این دوره قابل مشاهده است.</p>
+        <a href="{{ course.get_absolute_url }}" class="mt-4 inline-block rounded-lg bg-emerald-600 px-6 py-3 font-bold text-white hover:bg-emerald-700">مشاهده دوره و خرید</a>
+      </div>
+    {% endif %}
+
+    <div class="mt-8 flex justify-between text-sm">
+      {% if prev_lesson %}<a href="{{ prev_lesson.get_absolute_url }}" class="text-emerald-700 hover:underline">→ {{ prev_lesson.title }}</a>{% else %}<span></span>{% endif %}
+      {% if next_lesson %}<a href="{{ next_lesson.get_absolute_url }}" class="text-emerald-700 hover:underline">{{ next_lesson.title }} ←</a>{% endif %}
+    </div>
+  </article>
+
+  <aside class="order-first lg:order-none">
+    <div class="rounded-2xl bg-white p-4 text-sm ring-1 ring-slate-200">
+      {% for chapter in chapters %}
+        <p class="mb-2 mt-3 font-bold first:mt-0">{{ chapter.title }}</p>
+        <ul class="space-y-1">
+          {% for item in chapter.lessons.all %}
+            <li><a href="{{ item.get_absolute_url }}" class="block rounded px-2 py-1 {% if item.pk == lesson.pk %}bg-emerald-50 font-bold text-emerald-800{% else %}text-slate-600 hover:bg-slate-50{% endif %}">{{ item.title }}</a></li>
+          {% endfor %}
+        </ul>
+      {% endfor %}
+    </div>
+  </aside>
+</div>
+{% endblock %}
