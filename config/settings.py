@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django.contrib.sitemaps",
     "apps.accounts",
     "apps.core",
     "apps.siteconfig",
@@ -49,6 +50,7 @@ INSTALLED_APPS = [
     "apps.shop",
     "apps.live",
     "apps.notify",
+    "apps.qa",
 ]
 
 MIDDLEWARE = [
@@ -61,6 +63,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "apps.accounts.middleware.ForcePasswordChangeMiddleware",
+    "apps.accounts.throttle.AdminLoginThrottleMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 

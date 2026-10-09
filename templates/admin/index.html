@@ -3,11 +3,15 @@
 {% block content %}
   {% load shop_admin %}
   {% pending_receipts as pending %}
-  {% if pending %}
-    <div style="background:#fef3c7;color:#92400e;padding:12px 16px;border-radius:6px;margin-bottom:16px">
-      {{ pending }} رسید کارت‌به‌کارت منتظر بررسی است —
-      <a href="{% url 'admin:shop_order_changelist' %}?status__exact=review" style="font-weight:bold">بررسی سفارش‌ها</a>
-    </div>
-  {% endif %}
+  {% unanswered_questions as unanswered %}
+  <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:16px">
+    <a href="{% url 'admin_sales_report' %}" class="button" style="padding:10px 16px">📊 گزارش فروش</a>
+    {% if pending %}
+      <a href="{% url 'admin:shop_order_changelist' %}?status__exact=review" style="background:#fef3c7;color:#92400e;padding:10px 16px;border-radius:6px;font-weight:bold">{{ pending }} رسید کارت‌به‌کارت منتظر بررسی است</a>
+    {% endif %}
+    {% if unanswered %}
+      <a href="{% url 'admin:qa_question_changelist' %}?answered=no" style="background:#e0f2fe;color:#075985;padding:10px 16px;border-radius:6px;font-weight:bold">{{ unanswered }} سوال بی‌پاسخ</a>
+    {% endif %}
+  </div>
   {{ block.super }}
 {% endblock %}

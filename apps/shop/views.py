@@ -1,5 +1,6 @@
 import json
 import logging
+import secrets
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -142,7 +143,8 @@ def order_receipt(request, number):
 @csrf_exempt
 @require_POST
 def bale_webhook(request, secret):
-    if secret != SiteSettings.load().bale_webhook_secret:
+    expected = SiteSettings.load().bale_webhook_secret
+    if not secrets.compare_digest(secret.encode(), expected.encode()):
         raise Http404
     try:
         update = json.loads(request.body)

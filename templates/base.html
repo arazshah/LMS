@@ -4,31 +4,31 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}{{ site.site_name }}{% endblock %}</title>
+  <meta name="description" content="{% block description %}{{ site.tagline }}{% endblock %}">
+  <link rel="canonical" href="{{ request.scheme }}://{{ request.get_host }}{{ request.path }}">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="fa_IR">
+  <meta property="og:site_name" content="{{ site.site_name }}">
+  <meta property="og:title" content="{% block og_title %}{{ site.site_name }}{% endblock %}">
+  <meta property="og:description" content="{% block og_description %}{{ site.tagline }}{% endblock %}">
+  <meta property="og:url" content="{{ request.scheme }}://{{ request.get_host }}{{ request.path }}">
+  {% block og_image %}{% endblock %}
   <link rel="stylesheet" href="{% static 'dist/main.css' %}">
   <script src="{% static 'dist/htmx.min.js' %}" defer></script>
 </head>
 <body class="flex min-h-screen flex-col bg-slate-50 font-sans text-slate-800 antialiased">
-  <header class="border-b border-slate-200 bg-white">
+  <header class="relative border-b border-slate-200 bg-white">
     <div class="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-4">
       <a href="{% url 'core:home' %}" class="text-lg font-bold text-emerald-700">{{ site.site_name }}</a>
-      <nav class="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm">
-        <a href="{% url 'catalog:course_list' %}" class="hover:text-emerald-700">دوره‌ها</a>
-        <a href="{% url 'shop:bundle_list' %}" class="hover:text-emerald-700">پکیج‌ها</a>
-        <a href="{% url 'live:list' %}" class="hover:text-emerald-700">کلاس زنده</a>
-        {% if user.is_authenticated %}
-          <a href="{% url 'catalog:my_courses' %}" class="hover:text-emerald-700">دوره‌های من</a>
-          <a href="{% url 'shop:order_list' %}" class="hover:text-emerald-700">سفارش‌ها</a>
-          {% if user.is_staff %}
-            <a href="{% url 'admin:index' %}" class="hover:text-emerald-700">پنل مدیریت</a>
-          {% endif %}
-          <a href="{% url 'accounts:profile' %}" class="text-slate-500 hover:text-emerald-700">{{ user.get_short_name }}</a>
-          <form method="post" action="{% url 'accounts:logout' %}">{% csrf_token %}
-            <button class="text-slate-500 hover:text-red-600">خروج</button>
-          </form>
-        {% else %}
-          <a href="{% url 'accounts:login' %}" class="rounded-lg bg-emerald-600 px-4 py-2 font-medium text-white hover:bg-emerald-700">ورود / ثبت‌نام</a>
-        {% endif %}
+      <nav class="hidden items-center gap-x-5 text-sm md:flex">
+        {% include "_nav_links.html" %}
       </nav>
+      <details class="group md:hidden">
+        <summary class="cursor-pointer list-none rounded-lg border border-slate-300 px-3 py-1 text-sm" aria-label="منو">☰ منو</summary>
+        <nav class="absolute inset-x-0 z-20 mt-3 flex flex-col gap-4 border-b border-slate-200 bg-white px-4 py-4 text-sm shadow-sm">
+          {% include "_nav_links.html" %}
+        </nav>
+      </details>
     </div>
   </header>
 

@@ -220,3 +220,31 @@ def test_admin_pages_load(client, course):
         reverse("admin:catalog_course_changelist"),
     ]:
         assert client.get(url).status_code == 200, url
+
+
+@pytest.mark.parametrize(
+    "path",
+    [
+        "public/../protected/receipts/r.png",
+        "public/covers/../../protected/receipts/r.png",
+        "public/./../protected/receipts/r.png",
+    ],
+)
+def test_public_media_cannot_escape_into_protected_files(rf, path):
+    from django.http import Http404
+
+    from apps.core.views import public_media
+
+    protected = settings.MEDIA_ROOT / "protected" / "receipts"
+    protected.mkdir(parents=True)
+    (protected / "r.png").write_bytes(b"SECRET")
+    with pytest.raises(Http404):
+        public_media(rf.get("/"), path)
+
+
+def test_public_media_traversal_over_http(client, db):
+    protected = settings.MEDIA_ROOT / "protected" / "receipts"
+    protected.mkdir(parents=True)
+    (protected / "r.png").write_bytes(b"SECRET")
+    response = client.get("/media/public/../protected/receipts/r.png")
+    assert response.status_code == 404

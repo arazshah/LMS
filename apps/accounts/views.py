@@ -6,6 +6,8 @@ from django.urls import reverse
 from django.utils.http import url_has_allowed_host_and_scheme, urlencode
 from django.views.decorators.http import require_POST
 
+from apps.core.utils import client_ip
+
 from . import otp
 from .forms import CodeForm, PhoneForm, ProfileForm
 from .models import User
@@ -13,11 +15,6 @@ from .sms import SMSError
 
 SESSION_PHONE = "otp_phone"
 SESSION_NEXT = "otp_next"
-
-
-def _client_ip(request):
-    # Coolify's proxy sets X-Real-IP; the app is not reachable except through it.
-    return request.META.get("HTTP_X_REAL_IP") or request.META.get("REMOTE_ADDR")
 
 
 def _safe_next(request, url):
@@ -37,7 +34,7 @@ def login_phone(request):
         phone = form.cleaned_data["phone"]
         request.session[SESSION_NEXT] = request.POST.get("next") or request.GET.get("next")
         try:
-            otp.request_code(phone, _client_ip(request))
+            otp.request_code(phone, client_ip(request))
         except otp.OTPError as exc:
             if otp.seconds_until_resend(phone):
                 # A code was already sent recently; let the user enter it.
@@ -64,7 +61,7 @@ def login_verify(request):
     form = CodeForm()
     if request.method == "POST" and request.POST.get("action") == "resend":
         try:
-            otp.request_code(phone, _client_ip(request))
+            otp.request_code(phone, client_ip(request))
             messages.success(request, "کد جدید ارسال شد.")
         except (otp.OTPError, SMSError) as exc:
             messages.error(request, str(exc))

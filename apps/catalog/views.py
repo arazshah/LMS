@@ -4,6 +4,9 @@ from django.db.models import Count, Prefetch, Q
 from django.http import FileResponse, Http404
 from django.shortcuts import get_object_or_404, render
 
+from apps.qa.forms import QuestionForm
+from apps.qa.views import can_ask
+
 from .models import Category, Chapter, Course, Enrollment, Lesson, LessonFile
 
 
@@ -75,6 +78,11 @@ def lesson_detail(request, course_slug, lesson_id):
             "lesson": lesson,
             "can_view": can_view,
             "video": getattr(lesson, "video", None),
+            "can_ask": can_ask(request.user, lesson),
+            "questions": lesson.questions.filter(is_hidden=False).select_related("user")
+            if can_ask(request.user, lesson)
+            else [],
+            "question_form": QuestionForm(),
             "chapters": chapters,
             "prev_lesson": lessons[index - 1] if index > 0 else None,
             "next_lesson": lessons[index + 1] if index + 1 < len(lessons) else None,

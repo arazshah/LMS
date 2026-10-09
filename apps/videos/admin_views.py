@@ -60,6 +60,8 @@ def upload_chunk(request, lesson_id):
 def upload_complete(request, lesson_id):
     lesson = get_object_or_404(Lesson, pk=lesson_id)
     filename = Path(request.POST.get("filename", "video.mp4")).name
+    if Path(filename).suffix.lower() not in uploads.ALLOWED_EXTENSIONS:
+        return _error("فرمت فایل پشتیبانی نمی‌شود.")
     try:
         total = int(request.POST["total_chunks"])
         size = int(request.POST["size"])

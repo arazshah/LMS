@@ -57,6 +57,13 @@ class SiteSettings(models.Model):
         help_text="پارامترها: #TITLE# (نام کلاس) و #TIME# (تاریخ و ساعت). خالی = ارسال نشود",
     )
 
+    sms_answer_template_id = models.PositiveIntegerField(
+        "قالب پیامک «پاسخ سوال شما داده شد»",
+        null=True,
+        blank=True,
+        help_text="پارامتر: #TITLE# (نام جلسه). خالی = ارسال نشود",
+    )
+
     card_number = models.CharField(
         "شماره کارت (کارت‌به‌کارت)", max_length=30, blank=True, help_text="به خریدار نمایش داده می‌شود"
     )

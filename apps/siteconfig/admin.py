@@ -19,6 +19,7 @@ class SiteSettingsAdmin(admin.ModelAdmin):
                     "sms_paid_template_id",
                     "sms_rejected_template_id",
                     "sms_reminder_template_id",
+                    "sms_answer_template_id",
                 ),
                 "description": (
                     "برای ورود دانشجوها با کد پیامکی لازم است. در sms.ir یک قالب «ارسال سریع» "

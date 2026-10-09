@@ -40,6 +40,12 @@ def order_paid(order) -> None:
     )
 
 
+def question_answered(question) -> None:
+    _send_after_commit(
+        question.user.phone, "sms_answer_template_id", {"TITLE": question.lesson.title}
+    )
+
+
 def receipt_rejected(order) -> None:
     _send_after_commit(order.user.phone, "sms_rejected_template_id", {"ORDER": order.number})
 

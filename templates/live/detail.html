@@ -3,6 +3,11 @@
 
 {% block title %}{{ live_class.title }} | {{ site.site_name }}{% endblock %}
 
+{% block description %}{{ live_class.summary|default:live_class.title }}{% endblock %}
+{% block og_description %}{{ live_class.summary|default:live_class.title }}{% endblock %}
+{% block og_title %}{{ live_class.title }}{% endblock %}
+{% block og_image %}{% if live_class.cover %}<meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{{ live_class.cover.url }}">{% endif %}{% endblock %}
+
 {% block content %}
 <div class="grid gap-8 lg:grid-cols-3">
   <div class="lg:col-span-2">

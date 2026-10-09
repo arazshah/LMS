@@ -1,0 +1,18 @@
+{% load static %}<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>خطای سرور</title>
+  <link rel="stylesheet" href="{% static 'dist/main.css' %}">
+</head>
+<body class="flex min-h-screen items-center justify-center bg-slate-50 p-4 font-sans text-slate-800">
+  {# Rendered without request context: keep it free of database lookups. #}
+  <div class="max-w-md rounded-2xl bg-white p-10 text-center ring-1 ring-slate-200">
+    <p class="text-6xl font-extrabold text-emerald-700">۵۰۰</p>
+    <h1 class="mt-4 text-xl font-bold">مشکلی پیش آمد.</h1>
+    <p class="mt-2 text-slate-600">خطا ثبت شد و بررسی می‌شود. چند دقیقه دیگر دوباره تلاش کنید.</p>
+    <a href="/" class="mt-6 inline-block rounded-lg bg-emerald-600 px-5 py-2 font-bold text-white">صفحه اصلی</a>
+  </div>
+</body>
+</html>

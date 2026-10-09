@@ -3,6 +3,11 @@
 
 {% block title %}{{ bundle.title }} | {{ site.site_name }}{% endblock %}
 
+{% block description %}{{ bundle.summary|default:bundle.title }}{% endblock %}
+{% block og_description %}{{ bundle.summary|default:bundle.title }}{% endblock %}
+{% block og_title %}{{ bundle.title }}{% endblock %}
+{% block og_image %}{% if bundle.cover %}<meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{{ bundle.cover.url }}">{% endif %}{% endblock %}
+
 {% block content %}
 <div class="grid gap-8 lg:grid-cols-3">
   <div class="lg:col-span-2">

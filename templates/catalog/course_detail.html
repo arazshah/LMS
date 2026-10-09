@@ -3,6 +3,11 @@
 
 {% block title %}{{ course.title }} | {{ site.site_name }}{% endblock %}
 
+{% block description %}{{ course.summary|default:course.title }}{% endblock %}
+{% block og_description %}{{ course.summary|default:course.title }}{% endblock %}
+{% block og_title %}{{ course.title }}{% endblock %}
+{% block og_image %}{% if course.cover %}<meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{{ course.cover.url }}">{% endif %}{% endblock %}
+
 {% block content %}
 <div class="grid gap-8 lg:grid-cols-3">
   <div class="lg:col-span-2">
