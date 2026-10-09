@@ -42,7 +42,11 @@ class SiteSettingsAdmin(admin.ModelAdmin):
             {
                 "fields": ("bale_bot_token", "bale_bot_username", "bale_provider_token"),
                 "description": (
-                    "بعد از ذخیره، دکمه «اتصال ربات بله به سایت» در بالای همین صفحه را بزنید."
+                    "۱. توکن ربات و نام کاربری ربات را از @botfather در بله بگیرید و وارد کنید.\n"
+                    "۲. تنظیمات را ذخیره کنید.\n"
+                    "۳. دکمه «اتصال ربات بله» در بالای این صفحه را بزنید تا webhook ثبت شود.\n"
+                    "بدون این مرحله ربات پیام دریافت نمی‌کند!\n\n"
+                    "«توکن درگاه پرداخت» اختیاری است — بدون آن ربات اطلاعات کارت‌به‌کارت را می‌فرستد."
                 ),
             },
         ),
@@ -59,6 +63,11 @@ class SiteSettingsAdmin(admin.ModelAdmin):
                 self.admin_site.admin_view(self.connect_bale),
                 name="siteconfig_connect_bale",
             ),
+            path(
+                "bale-status/",
+                self.admin_site.admin_view(self.bale_status),
+                name="siteconfig_bale_status",
+            ),
             *super().get_urls(),
         ]
 
@@ -70,15 +79,50 @@ class SiteSettingsAdmin(admin.ModelAdmin):
         if request.method != "POST":
             return redirect(reverse("admin:siteconfig_sitesettings_change", args=[1]))
         config = SiteSettings.load()
-        url = request.build_absolute_uri(
-            reverse("shop:bale_webhook", args=[config.bale_webhook_secret])
-        )
+        if not config.bale_bot_token:
+            messages.error(request, "ابتدا توکن ربات بله را وارد و ذخیره کنید.")
+            return redirect(reverse("admin:siteconfig_sitesettings_change", args=[1]))
+
+        # Build the webhook URL — prefer HTTPS and use the request's host
+        path = reverse("shop:bale_webhook", args=[config.bale_webhook_secret])
+        # Force HTTPS for production (Bale requires HTTPS webhooks)
+        scheme = "https"
+        host = request.get_host()
+        url = f"{scheme}://{host}{path}"
         try:
             bale.set_webhook(url)
         except bale.BaleError as exc:
             messages.error(request, f"اتصال ربات ناموفق بود: {exc}")
         else:
-            messages.success(request, "ربات بله به سایت متصل شد.")
+            messages.success(
+                request,
+                f"✅ ربات بله به سایت متصل شد. آدرس webhook: {url}",
+            )
+        return redirect(reverse("admin:siteconfig_sitesettings_change", args=[1]))
+
+    def bale_status(self, request):
+        from django.contrib import messages
+        from django.http import HttpResponse
+
+        from apps.shop import bale
+
+        config = SiteSettings.load()
+        if not config.bale_bot_token:
+            messages.warning(request, "توکن ربات بله تنظیم نشده است.")
+            return redirect(reverse("admin:siteconfig_sitesettings_change", args=[1]))
+        try:
+            result = bale.call("getWebhookInfo", {})
+            url = result.get("url") or "(ثبت نشده)"
+            pending = result.get("pending_update_count", 0)
+            last_error = result.get("last_error_message") or ""
+            msg = f"Webhook URL: {url} | Pending: {pending}"
+            if last_error:
+                msg += f" | آخرین خطا: {last_error}"
+                messages.warning(request, msg)
+            else:
+                messages.success(request, msg)
+        except bale.BaleError as exc:
+            messages.error(request, f"خطا در بررسی وضعیت: {exc}")
         return redirect(reverse("admin:siteconfig_sitesettings_change", args=[1]))
 
     def has_add_permission(self, request):

@@ -115,7 +115,8 @@ class SiteSettings(models.Model):
 
     @property
     def bale_configured(self):
-        return bool(self.bale_bot_token and self.bale_bot_username and self.bale_provider_token)
+        # provider_token is NOT required — bot can still send card-to-card instructions
+        return bool(self.bale_bot_token and self.bale_bot_username)
 
     @property
     def card_configured(self):

@@ -4,8 +4,15 @@
   <li>
     <form method="post" action="{% url 'admin:siteconfig_connect_bale' %}" style="display:inline">
       {% csrf_token %}
-      <button type="submit" class="historylink" style="border:0;cursor:pointer">اتصال ربات بله به سایت</button>
+      <button type="submit" class="historylink" style="border:0;cursor:pointer;background:#2e7d32;color:#fff;padding:5px 12px;border-radius:4px">
+        🔗 اتصال ربات بله به سایت
+      </button>
     </form>
+  </li>
+  <li>
+    <a href="{% url 'admin:siteconfig_bale_status' %}" class="historylink" style="background:#1565c0;color:#fff;padding:5px 12px;border-radius:4px">
+      📡 بررسی وضعیت Webhook
+    </a>
   </li>
   {{ block.super }}
 {% endblock %}
