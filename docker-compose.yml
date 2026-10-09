@@ -1,0 +1,86 @@
+# Deployed by Coolify (Docker Compose build pack).
+# In Coolify: assign the domain (lms.araz.me / staging.lms.araz.me) to the `web` service
+# on port 8000 and set the environment variables listed in .env.example.
+services:
+  web:
+    build: .
+    command: web
+    environment:
+      - DJANGO_DEBUG=${DJANGO_DEBUG:-False}
+      - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY:?set DJANGO_SECRET_KEY}
+      - DJANGO_ALLOWED_HOSTS=${DJANGO_ALLOWED_HOSTS:?set DJANGO_ALLOWED_HOSTS}
+      - DJANGO_CSRF_TRUSTED_ORIGINS=${DJANGO_CSRF_TRUSTED_ORIGINS:?set DJANGO_CSRF_TRUSTED_ORIGINS}
+      - DJANGO_ADMIN_URL=${DJANGO_ADMIN_URL:-admin/}
+      - DATABASE_URL=postgres://${POSTGRES_USER:-lms}:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-lms}
+      - REDIS_URL=redis://redis:6379/0
+    volumes:
+      - media:/app/media
+    expose:
+      - "8000"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8000/health/"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+
+  worker:
+    build: .
+    command: worker
+    environment:
+      - DJANGO_DEBUG=${DJANGO_DEBUG:-False}
+      - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY:?set DJANGO_SECRET_KEY}
+      - DJANGO_ALLOWED_HOSTS=${DJANGO_ALLOWED_HOSTS:?set DJANGO_ALLOWED_HOSTS}
+      - DATABASE_URL=postgres://${POSTGRES_USER:-lms}:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-lms}
+      - REDIS_URL=redis://redis:6379/0
+    volumes:
+      - media:/app/media
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "celery -A config inspect ping -d celery@$$HOSTNAME || exit 1"]
+      interval: 60s
+      timeout: 15s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+
+  db:
+    image: postgres:17-alpine
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB:-lms}
+      - POSTGRES_USER=${POSTGRES_USER:-lms}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+volumes:
+  media:
+  postgres-data:
+  redis-data:
