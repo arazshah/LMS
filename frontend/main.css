@@ -12,3 +12,29 @@
 @theme {
   --font-sans: "Vazirmatn", system-ui, sans-serif;
 }
+
+/* Prose-like body text for lesson/course descriptions */
+.prose-rtl {
+  line-height: 2;
+  color: #334155;
+}
+.prose-rtl p { margin-bottom: 1rem; }
+.prose-rtl h2 { font-size: 1.25rem; font-weight: 700; margin: 1.5rem 0 0.5rem; }
+.prose-rtl ul { list-style: disc; padding-right: 1.5rem; margin-bottom: 1rem; }
+.prose-rtl ol { list-style: decimal; padding-right: 1.5rem; margin-bottom: 1rem; }
+
+/* Gradient text for headings */
+.text-gradient {
+  background: linear-gradient(135deg, #059669, #0d9488);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Lesson sidebar scroll */
+.sidebar-nav {
+  max-height: calc(100vh - 5rem);
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #d1d5db transparent;
+}

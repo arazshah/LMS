@@ -77,10 +77,14 @@ class SiteSettings(models.Model):
         "نام کاربری ربات بله", max_length=100, blank=True, help_text="بدون @، مثلاً araz_lms_bot"
     )
     bale_provider_token = models.CharField(
-        "شماره کارت یا توکن کیف پول برای پرداخت بله",
+        "توکن درگاه پرداخت بله (provider_token)",
         max_length=100,
         blank=True,
-        help_text="پول پرداخت‌شده در بله به این کارت/کیف پول واریز می‌شود",
+        help_text=(
+            "توکن درگاه پرداخت از @BotFather در بله (منوی Bot Payments). "
+            "این توکن با شماره کارت فرق دارد. "
+            "اگر این فیلد خالی باشد، ربات در صورت خطا آدرس کارت‌به‌کارت را به کاربر می‌دهد."
+        ),
     )
     bale_webhook_secret = models.CharField(max_length=64, default=_new_secret, editable=False)
 

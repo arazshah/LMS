@@ -1,40 +1,130 @@
 {% extends "base.html" %}
 
 {% block content %}
-<section class="rounded-2xl bg-gradient-to-br from-emerald-700 to-teal-900 px-6 py-14 text-center text-white">
-  <h1 class="text-3xl font-extrabold md:text-4xl">{{ site.site_name }}</h1>
-  {% if site.tagline %}<p class="mx-auto mt-4 max-w-2xl text-emerald-50">{{ site.tagline }}</p>{% endif %}
-  <a href="{% url 'catalog:course_list' %}" class="mt-8 inline-block rounded-lg bg-white px-6 py-3 font-bold text-emerald-800 hover:bg-emerald-50">مشاهده دوره‌ها</a>
+<!-- Hero -->
+<section class="relative overflow-hidden rounded-3xl bg-slate-900 px-6 py-16 text-center text-white sm:py-20">
+  <!-- Background pattern -->
+  <div class="pointer-events-none absolute inset-0 opacity-10">
+    <div class="absolute -right-20 -top-20 h-80 w-80 rounded-full bg-emerald-400 blur-3xl"></div>
+    <div class="absolute -bottom-20 -left-20 h-80 w-80 rounded-full bg-teal-400 blur-3xl"></div>
+  </div>
+  <div class="relative">
+    <span class="inline-block rounded-full bg-emerald-500/20 px-4 py-1.5 text-xs font-semibold text-emerald-300 ring-1 ring-emerald-500/30">آموزش تخصصی GeoAI</span>
+    <h1 class="mt-4 text-3xl font-extrabold leading-tight sm:text-4xl lg:text-5xl">{{ site.site_name }}</h1>
+    {% if site.tagline %}<p class="mx-auto mt-4 max-w-2xl text-base text-slate-300 sm:text-lg">{{ site.tagline }}</p>{% endif %}
+    <div class="mt-8 flex flex-wrap justify-center gap-3">
+      <a href="{% url 'catalog:course_list' %}" class="rounded-xl bg-emerald-500 px-8 py-3 font-bold text-white shadow-lg shadow-emerald-500/25 transition hover:bg-emerald-400">مشاهده دوره‌ها</a>
+      {% if user.is_authenticated %}
+        <a href="{% url 'catalog:my_courses' %}" class="rounded-xl border border-slate-600 bg-slate-800/60 px-8 py-3 font-bold text-slate-200 transition hover:border-slate-500 hover:bg-slate-700">دوره‌های من</a>
+      {% else %}
+        <a href="{% url 'accounts:login' %}" class="rounded-xl border border-slate-600 bg-slate-800/60 px-8 py-3 font-bold text-slate-200 transition hover:border-slate-500 hover:bg-slate-700">ورود / ثبت‌نام رایگان</a>
+      {% endif %}
+    </div>
+  </div>
 </section>
 
+<!-- Stats -->
+<section class="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-4">
+  {% with total=courses|length %}
+  <div class="rounded-2xl bg-white p-4 text-center shadow-sm ring-1 ring-slate-100">
+    <p class="text-2xl font-extrabold text-emerald-600">{{ total }}+</p>
+    <p class="mt-1 text-xs text-slate-500">دوره تخصصی</p>
+  </div>
+  {% endwith %}
+  <div class="rounded-2xl bg-white p-4 text-center shadow-sm ring-1 ring-slate-100">
+    <p class="text-2xl font-extrabold text-emerald-600">HLS</p>
+    <p class="mt-1 text-xs text-slate-500">استریم با کیفیت</p>
+  </div>
+  <div class="rounded-2xl bg-white p-4 text-center shadow-sm ring-1 ring-slate-100">
+    <p class="text-2xl font-extrabold text-emerald-600">۲۴/۷</p>
+    <p class="mt-1 text-xs text-slate-500">دسترسی دائمی</p>
+  </div>
+  <div class="rounded-2xl bg-white p-4 text-center shadow-sm ring-1 ring-slate-100">
+    <p class="text-2xl font-extrabold text-emerald-600">Live</p>
+    <p class="mt-1 text-xs text-slate-500">کلاس زنده</p>
+  </div>
+</section>
+
+<!-- Categories -->
 {% if categories %}
 <section class="mt-10">
-  <h2 class="mb-4 text-xl font-bold">دسته‌بندی‌ها</h2>
-  <div class="flex flex-wrap gap-2">
+  <div class="flex items-center justify-between">
+    <h2 class="text-xl font-bold text-slate-900">دسته‌بندی‌ها</h2>
+  </div>
+  <div class="mt-4 flex flex-wrap gap-2">
     {% for category in categories %}
-      <a href="{% url 'catalog:course_list' %}?category={{ category.slug|urlencode }}" class="rounded-full bg-white px-4 py-2 text-sm ring-1 ring-slate-200 hover:ring-emerald-500">{{ category.title }}</a>
+      <a href="{% url 'catalog:course_list' %}?category={{ category.slug|urlencode }}"
+         class="group flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:border-emerald-400 hover:text-emerald-700">
+        <span class="h-2 w-2 rounded-full bg-emerald-400 group-hover:bg-emerald-500"></span>
+        {{ category.title }}
+      </a>
     {% endfor %}
   </div>
 </section>
 {% endif %}
 
+<!-- Live classes -->
 {% if live_classes %}
-<section class="mt-10">
-  <h2 class="mb-4 text-xl font-bold">کلاس‌های زنده</h2>
-  <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+<section class="mt-12">
+  <div class="mb-5 flex items-center justify-between">
+    <h2 class="text-xl font-bold text-slate-900">کلاس‌های زنده پیش‌رو</h2>
+    <a href="{% url 'live:list' %}" class="text-sm font-medium text-emerald-600 hover:text-emerald-700">همه ←</a>
+  </div>
+  <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
     {% for live_class in live_classes %}{% include "live/_card.html" %}{% endfor %}
   </div>
 </section>
 {% endif %}
 
-<section class="mt-10">
-  <h2 class="mb-4 text-xl font-bold">جدیدترین دوره‌ها</h2>
+<!-- Latest courses -->
+<section class="mt-12">
+  <div class="mb-5 flex items-center justify-between">
+    <h2 class="text-xl font-bold text-slate-900">دوره‌های آموزشی</h2>
+    <a href="{% url 'catalog:course_list' %}" class="text-sm font-medium text-emerald-600 hover:text-emerald-700">همه دوره‌ها ←</a>
+  </div>
   {% if courses %}
     <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
       {% for course in courses %}{% include "catalog/_course_card.html" %}{% endfor %}
     </div>
   {% else %}
-    <p class="rounded-2xl bg-white p-8 text-center text-slate-500 ring-1 ring-slate-200">دوره‌ها به‌زودی منتشر می‌شوند.</p>
+    <div class="rounded-2xl border-2 border-dashed border-slate-200 p-12 text-center text-slate-400">
+      <svg class="mx-auto h-12 w-12 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+      <p class="mt-3 font-medium">دوره‌ها به‌زودی منتشر می‌شوند.</p>
+    </div>
   {% endif %}
+</section>
+
+<!-- Features -->
+<section class="mt-14 rounded-3xl bg-white p-8 shadow-sm ring-1 ring-slate-100">
+  <h2 class="mb-8 text-center text-xl font-bold text-slate-900">چرا این پلتفرم؟</h2>
+  <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+    <div class="flex gap-4">
+      <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600">
+        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.069A1 1 0 0121 8.867V15.1a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+      </div>
+      <div>
+        <h3 class="font-bold text-slate-900">ویدیو با کیفیت بالا</h3>
+        <p class="mt-1 text-sm text-slate-500">آموزش‌ها با کیفیت تا ۱۰۸۰p و پخش تطبیقی HLS ارائه می‌شوند.</p>
+      </div>
+    </div>
+    <div class="flex gap-4">
+      <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-sky-50 text-sky-600">
+        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z"/></svg>
+      </div>
+      <div>
+        <h3 class="font-bold text-slate-900">پشتیبانی مستقیم</h3>
+        <p class="mt-1 text-sm text-slate-500">سوال‌هایتان را زیر هر جلسه بپرسید و مستقیم پاسخ بگیرید.</p>
+      </div>
+    </div>
+    <div class="flex gap-4">
+      <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-violet-50 text-violet-600">
+        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/></svg>
+      </div>
+      <div>
+        <h3 class="font-bold text-slate-900">محتوای کاربردی</h3>
+        <p class="mt-1 text-sm text-slate-500">پروژه‌های واقعی با داده‌های ماهواره‌ای، نوت‌بوک‌های آماده و کدهای کامل.</p>
+      </div>
+    </div>
+  </div>
 </section>
 {% endblock %}

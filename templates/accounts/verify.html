@@ -4,34 +4,65 @@
 {% block title %}کد تأیید | {{ site.site_name }}{% endblock %}
 
 {% block content %}
-<div class="mx-auto max-w-md rounded-2xl bg-white p-8 shadow-sm ring-1 ring-slate-200">
-  <h1 class="text-2xl font-extrabold">کد تأیید</h1>
-  <p class="mt-2 text-sm text-slate-600">کد ارسال‌شده به <span dir="ltr" class="font-bold">{{ phone|fa_num }}</span> را وارد کنید.
-    <a href="{% url 'accounts:login' %}" class="text-emerald-700 hover:underline">تغییر شماره</a></p>
-  <form method="post" class="mt-6 space-y-4">
-    {% csrf_token %}
-    {% include "accounts/_errors.html" %}
-    {{ form.code }}
-    {% for error in form.code.errors %}<p class="text-sm text-red-600">{{ error }}</p>{% endfor %}
-    <button class="w-full rounded-lg bg-emerald-600 py-3 font-bold text-white hover:bg-emerald-700">ورود</button>
-  </form>
-  <form method="post" class="mt-4 text-center text-sm">
-    {% csrf_token %}
-    <input type="hidden" name="action" value="resend">
-    <button id="resend" class="text-emerald-700 hover:underline disabled:text-slate-400 disabled:no-underline" {% if wait_seconds %}disabled{% endif %}>ارسال مجدد کد</button>
-    <span id="countdown" class="text-slate-400" data-seconds="{{ wait_seconds }}"></span>
-  </form>
+<div class="flex min-h-[60vh] items-center justify-center">
+  <div class="w-full max-w-md">
+    <div class="overflow-hidden rounded-3xl bg-white shadow-xl ring-1 ring-slate-200">
+      <div class="bg-gradient-to-r from-emerald-500 to-teal-500 p-6 text-white">
+        <div class="flex items-center gap-3">
+          <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-white/20 text-lg font-black">G</span>
+          <div>
+            <p class="font-bold">{{ site.site_name }}</p>
+            <p class="text-xs text-emerald-100">تأیید شماره موبایل</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="p-6">
+        <h1 class="text-xl font-extrabold text-slate-900">کد تأیید</h1>
+        <p class="mt-1.5 text-sm text-slate-500">
+          کد ارسال‌شده به
+          <span dir="ltr" class="font-bold text-slate-700">{{ phone|fa_num }}</span>
+          را وارد کنید.
+          <a href="{% url 'accounts:login' %}" class="text-emerald-600 hover:underline">تغییر شماره</a>
+        </p>
+
+        <form method="post" class="mt-6 space-y-4">
+          {% csrf_token %}
+          {% include "accounts/_errors.html" %}
+          <div>
+            <label class="mb-1.5 block text-sm font-medium text-slate-700">کد تأیید</label>
+            {{ form.code }}
+            {% for error in form.code.errors %}
+              <p class="mt-1 text-sm text-red-500">{{ error }}</p>
+            {% endfor %}
+          </div>
+          <button class="w-full rounded-xl bg-emerald-500 py-3 font-bold text-white shadow-lg shadow-emerald-500/20 transition hover:bg-emerald-400">
+            ورود
+          </button>
+        </form>
+
+        <form method="post" class="mt-4 flex items-center justify-center gap-2 text-sm">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="resend">
+          <button id="resend" class="text-emerald-600 hover:underline disabled:cursor-not-allowed disabled:text-slate-400"
+                  {% if wait_seconds %}disabled{% endif %}>ارسال مجدد کد</button>
+          <span id="countdown" class="text-slate-400" data-seconds="{{ wait_seconds }}"></span>
+        </form>
+      </div>
+    </div>
+  </div>
 </div>
+
 <script>
-  (function () {
-    var el = document.getElementById("countdown"), btn = document.getElementById("resend");
-    var left = parseInt(el.dataset.seconds, 10) || 0;
-    var fa = function (n) { return String(n).replace(/\d/g, function (d) { return "۰۱۲۳۴۵۶۷۸۹"[d]; }); };
-    function tick() {
-      if (left <= 0) { el.textContent = ""; btn.disabled = false; return; }
-      el.textContent = "(" + fa(left) + " ثانیه)"; left -= 1; setTimeout(tick, 1000);
-    }
-    tick();
-  })();
+(function () {
+  var el = document.getElementById("countdown"), btn = document.getElementById("resend");
+  var left = parseInt(el.dataset.seconds, 10) || 0;
+  var fa = function (n) { return String(n).replace(/\d/g, function (d) { return "۰۱۲۳۴۵۶۷۸۹"[d]; }); };
+  function tick() {
+    if (left <= 0) { el.textContent = ""; btn.disabled = false; return; }
+    el.textContent = "(" + fa(left) + " ثانیه)"; left -= 1; setTimeout(tick, 1000);
+  }
+  tick();
+})();
 </script>
 {% endblock %}

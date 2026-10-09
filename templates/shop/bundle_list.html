@@ -4,12 +4,23 @@
 {% block title %}پکیج‌ها | {{ site.site_name }}{% endblock %}
 
 {% block content %}
-<h1 class="mb-6 text-2xl font-extrabold">پکیج‌های آموزشی</h1>
+<div class="mb-8">
+  <h1 class="text-2xl font-extrabold text-slate-900">پکیج‌های آموزشی</h1>
+  <p class="mt-2 text-sm text-slate-500">مجموعه‌ای از دوره‌های مرتبط با تخفیف ویژه</p>
+</div>
+
 {% if bundles %}
   <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
     {% for bundle in bundles %}{% include "shop/_bundle_card.html" %}{% endfor %}
   </div>
 {% else %}
-  <p class="rounded-2xl bg-white p-8 text-center text-slate-500 ring-1 ring-slate-200">پکیجی منتشر نشده است.</p>
+  <div class="rounded-2xl border-2 border-dashed border-slate-200 py-16 text-center">
+    <svg class="mx-auto h-14 w-14 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+    <p class="mt-4 font-bold text-slate-500">پکیجی منتشر نشده است.</p>
+    <a href="{% url 'catalog:course_list' %}"
+       class="mt-4 inline-block rounded-xl bg-emerald-500 px-6 py-2.5 font-bold text-white shadow-sm transition hover:bg-emerald-400">
+      مشاهده دوره‌ها
+    </a>
+  </div>
 {% endif %}
 {% endblock %}

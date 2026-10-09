@@ -4,20 +4,50 @@
 {% block title %}مشخصات من | {{ site.site_name }}{% endblock %}
 
 {% block content %}
-<div class="mx-auto max-w-md rounded-2xl bg-white p-8 shadow-sm ring-1 ring-slate-200">
-  <h1 class="text-2xl font-extrabold">مشخصات من</h1>
-  <p class="mt-2 text-sm text-slate-600">موبایل: <span dir="ltr">{{ user.phone|fa_num }}</span></p>
-  <form method="post" class="mt-6 space-y-4">
-    {% csrf_token %}
-    {% include "accounts/_errors.html" %}
-    {% for field in form %}
+<div class="mx-auto max-w-xl">
+  <h1 class="mb-6 text-2xl font-extrabold text-slate-900">مشخصات من</h1>
+
+  <div class="overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-slate-200">
+    <!-- Header strip -->
+    <div class="flex items-center gap-4 bg-slate-50 px-6 py-5 ring-1 ring-slate-200">
+      <span class="flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-500 text-2xl font-black text-white">
+        {{ user.first_name|first|default:"د" }}
+      </span>
       <div>
-        <label class="mb-1 block text-sm font-medium" for="{{ field.id_for_label }}">{{ field.label }}</label>
-        {{ field }}
-        {% for error in field.errors %}<p class="mt-1 text-sm text-red-600">{{ error }}</p>{% endfor %}
+        <p class="font-bold text-slate-900">{{ user.first_name|default:"کاربر" }} {{ user.last_name }}</p>
+        <p dir="ltr" class="text-sm text-slate-500">{{ user.phone|fa_num }}</p>
       </div>
-    {% endfor %}
-    <button class="w-full rounded-lg bg-emerald-600 py-3 font-bold text-white hover:bg-emerald-700">ذخیره</button>
-  </form>
+    </div>
+
+    <div class="p-6">
+      <form method="post" class="space-y-5">
+        {% csrf_token %}
+        {% include "accounts/_errors.html" %}
+        {% for field in form %}
+          <div>
+            <label class="mb-1.5 block text-sm font-medium text-slate-700" for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+            {% for error in field.errors %}
+              <p class="mt-1 text-sm text-red-500">{{ error }}</p>
+            {% endfor %}
+          </div>
+        {% endfor %}
+        <button class="w-full rounded-xl bg-emerald-500 py-3 font-bold text-white shadow-lg shadow-emerald-500/20 transition hover:bg-emerald-400">
+          ذخیره تغییرات
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <div class="mt-4 flex gap-3">
+    <a href="{% url 'catalog:my_courses' %}"
+       class="flex-1 rounded-xl border border-slate-200 bg-white py-2.5 text-center text-sm font-medium text-slate-700 transition hover:border-emerald-400 hover:text-emerald-700">
+      دوره‌های من
+    </a>
+    <a href="{% url 'shop:order_list' %}"
+       class="flex-1 rounded-xl border border-slate-200 bg-white py-2.5 text-center text-sm font-medium text-slate-700 transition hover:border-emerald-400 hover:text-emerald-700">
+      سفارش‌های من
+    </a>
+  </div>
 </div>
 {% endblock %}

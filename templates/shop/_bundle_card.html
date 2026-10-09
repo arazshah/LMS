@@ -1,17 +1,32 @@
 {% load fa %}
-<a href="{{ bundle.get_absolute_url }}" class="group flex flex-col overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200 transition hover:shadow-md">
+<a href="{{ bundle.get_absolute_url }}"
+   class="group flex flex-col overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200 transition hover:-translate-y-0.5 hover:shadow-lg hover:ring-sky-300">
   {% if bundle.cover %}
-    <img src="{{ bundle.cover.url }}" alt="{{ bundle.title }}" class="aspect-video w-full object-cover">
+    <img src="{{ bundle.cover.url }}" alt="{{ bundle.title }}" class="aspect-video w-full object-cover transition group-hover:scale-[1.02]">
   {% else %}
-    <div class="flex aspect-video w-full items-center justify-center bg-gradient-to-br from-sky-700 to-indigo-900 p-4 text-center text-lg font-bold text-white">{{ bundle.title }}</div>
+    <div class="relative flex aspect-video w-full items-center justify-center overflow-hidden bg-gradient-to-br from-sky-700 to-indigo-900 p-4 text-center">
+      <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,_rgba(99,102,241,0.3),transparent)]"></div>
+      <p class="relative text-lg font-bold text-white/90">{{ bundle.title }}</p>
+    </div>
   {% endif %}
   <div class="flex flex-1 flex-col p-5">
-    <span class="mb-2 w-fit rounded-full bg-sky-50 px-2 py-1 text-xs text-sky-700">پکیج · {{ bundle.courses.count|fa_num }} دوره</span>
-    <h3 class="font-bold text-slate-900 group-hover:text-emerald-700">{{ bundle.title }}</h3>
-    {% if bundle.summary %}<p class="mt-2 line-clamp-2 text-sm text-slate-600">{{ bundle.summary }}</p>{% endif %}
-    <p class="mt-auto pt-4 text-sm">
-      {% with original=bundle.original_price %}{% if original > bundle.price %}<span class="text-slate-400 line-through">{{ original|toman }}</span> {% endif %}{% endwith %}
-      <span class="font-bold text-slate-900">{{ bundle.price|toman }}</span>
-    </p>
+    <span class="mb-2 w-fit rounded-full bg-sky-50 px-2.5 py-1 text-xs font-medium text-sky-700 ring-1 ring-sky-200">
+      پکیج · {{ bundle.courses.count|fa_num }} دوره
+    </span>
+    <h3 class="font-bold text-slate-900 transition group-hover:text-emerald-700">{{ bundle.title }}</h3>
+    {% if bundle.summary %}
+      <p class="mt-2 line-clamp-2 text-sm text-slate-500">{{ bundle.summary }}</p>
+    {% endif %}
+    <div class="mt-auto flex items-center justify-between pt-4">
+      <div>
+        {% with original=bundle.original_price %}
+          {% if original > bundle.price %}
+            <p class="text-xs text-slate-400 line-through">{{ original|toman }}</p>
+          {% endif %}
+        {% endwith %}
+        <p class="font-bold text-slate-900">{{ bundle.price|toman }}</p>
+      </div>
+      <span class="text-xs text-slate-400">مشاهده پکیج ←</span>
+    </div>
   </div>
 </a>

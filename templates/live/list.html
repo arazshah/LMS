@@ -3,12 +3,23 @@
 {% block title %}کلاس‌های زنده | {{ site.site_name }}{% endblock %}
 
 {% block content %}
-<h1 class="mb-6 text-2xl font-extrabold">کلاس‌های زنده</h1>
+<div class="mb-8">
+  <h1 class="text-2xl font-extrabold text-slate-900">کلاس‌های زنده</h1>
+  <p class="mt-2 text-sm text-slate-500">آموزش تعاملی و زنده با مدرس</p>
+</div>
+
 {% if classes %}
   <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
     {% for live_class in classes %}{% include "live/_card.html" %}{% endfor %}
   </div>
 {% else %}
-  <p class="rounded-2xl bg-white p-8 text-center text-slate-500 ring-1 ring-slate-200">کلاس زنده‌ای برنامه‌ریزی نشده است.</p>
+  <div class="rounded-2xl border-2 border-dashed border-slate-200 py-16 text-center">
+    <svg class="mx-auto h-14 w-14 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 10l4.553-2.069A1 1 0 0121 8.867V15.1a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+    <p class="mt-4 font-bold text-slate-500">کلاس زنده‌ای برنامه‌ریزی نشده است.</p>
+    <a href="{% url 'catalog:course_list' %}"
+       class="mt-4 inline-block rounded-xl bg-emerald-500 px-6 py-2.5 font-bold text-white shadow-sm transition hover:bg-emerald-400">
+      مشاهده دوره‌ها
+    </a>
+  </div>
 {% endif %}
 {% endblock %}

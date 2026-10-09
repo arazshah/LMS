@@ -3,13 +3,24 @@
 {% block title %}صفحه پیدا نشد | {{ site.site_name }}{% endblock %}
 
 {% block content %}
-<div class="mx-auto max-w-md rounded-2xl bg-white p-10 text-center ring-1 ring-slate-200">
-  <p class="text-6xl font-extrabold text-emerald-700">۴۰۴</p>
-  <h1 class="mt-4 text-xl font-bold">صفحه‌ای که دنبالش بودید پیدا نشد.</h1>
-  <p class="mt-2 text-slate-600">ممکن است آدرس اشتباه باشد یا دسترسی به این صفحه را نداشته باشید.</p>
-  <div class="mt-6 flex justify-center gap-3">
-    <a href="{% url 'core:home' %}" class="rounded-lg bg-emerald-600 px-5 py-2 font-bold text-white hover:bg-emerald-700">صفحه اصلی</a>
-    <a href="{% url 'catalog:course_list' %}" class="rounded-lg border border-emerald-600 px-5 py-2 text-emerald-700 hover:bg-emerald-50">دوره‌ها</a>
+<div class="flex min-h-[60vh] items-center justify-center">
+  <div class="max-w-md text-center">
+    <p class="text-[6rem] font-extrabold leading-none text-slate-100">۴۰۴</p>
+    <div class="-mt-6 relative z-10">
+      <svg class="mx-auto h-20 w-20 text-emerald-500 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+    </div>
+    <h1 class="mt-4 text-2xl font-extrabold text-slate-900">صفحه‌ای پیدا نشد</h1>
+    <p class="mt-2 text-slate-500">ممکن است آدرس اشتباه باشد یا این صفحه حذف شده باشد.</p>
+    <div class="mt-8 flex justify-center gap-3">
+      <a href="{% url 'core:home' %}"
+         class="rounded-xl bg-emerald-500 px-6 py-2.5 font-bold text-white shadow-lg shadow-emerald-500/20 transition hover:bg-emerald-400">
+        صفحه اصلی
+      </a>
+      <a href="{% url 'catalog:course_list' %}"
+         class="rounded-xl border border-slate-200 bg-white px-6 py-2.5 font-medium text-slate-700 transition hover:border-emerald-400 hover:text-emerald-700">
+        دوره‌ها
+      </a>
+    </div>
   </div>
 </div>
 {% endblock %}
