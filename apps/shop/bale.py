@@ -75,6 +75,32 @@ def send_invoice(chat_id, order: Order) -> None:
     )
 
 
+def _send_card_instructions(chat_id, order: Order) -> None:
+    config = SiteSettings.load()
+    lines = [
+        f"📋 سفارش {order.number}",
+        f"📦 {order.title}",
+        f"💰 مبلغ: {order.total:,} تومان",
+        "",
+    ]
+    if config.card_number:
+        lines += [
+            "لطفاً مبلغ را به کارت زیر واریز کنید:",
+            f"💳 {config.card_number}",
+        ]
+        if config.card_holder:
+            lines.append(f"به نام: {config.card_holder}")
+        if config.card_bank:
+            lines.append(f"بانک: {config.card_bank}")
+        lines += [
+            "",
+            "پس از واریز، تصویر رسید را در صفحه سفارش سایت آپلود کنید تا تأیید شود.",
+        ]
+    else:
+        lines.append("برای پرداخت به سایت برگردید و از روش کارت‌به‌کارت استفاده کنید.")
+    send_message(chat_id, "\n".join(lines))
+
+
 def _find_order_in_text(text: str) -> Order | None:
     if match := _TOKEN_RE.search(text):
         return Order.objects.filter(token=match.group(1)).first()
@@ -107,27 +133,15 @@ def _handle_text(message: dict) -> None:
         return
     order.bale_chat_id = str(chat_id)
     order.save(update_fields=["bale_chat_id", "updated_at"])
-    try:
-        send_invoice(chat_id, order)
-    except BaleError as exc:
-        logger.warning("send_invoice failed for order %s: %s", order.number, exc)
-        config = SiteSettings.load()
-        if config.card_number:
-            send_message(
-                chat_id,
-                f"سفارش {order.number} — {order.title}\n"
-                f"مبلغ: {order.total:,} تومان\n\n"
-                f"لطفاً مبلغ را به کارت زیر واریز کنید و تصویر رسید را در سایت آپلود کنید:\n"
-                f"{config.card_number}"
-                + (f"\nبه نام {config.card_holder}" if config.card_holder else "")
-                + f"\n\nبرگشت به سایت: برای ارسال رسید، صفحه سفارش را در سایت باز کنید.",
-            )
-        else:
-            send_message(
-                chat_id,
-                f"سفارش {order.number} دریافت شد.\n"
-                "برای تکمیل پرداخت، به سایت برگردید و از روش کارت‌به‌کارت استفاده کنید.",
-            )
+    config = SiteSettings.load()
+    if config.bale_provider_token:
+        try:
+            send_invoice(chat_id, order)
+            return
+        except BaleError as exc:
+            logger.warning("send_invoice failed for order %s: %s", order.number, exc)
+    # No provider_token or invoice failed → send card-to-card instructions directly
+    _send_card_instructions(chat_id, order)
 
 
 def _handle_pre_checkout(query: dict) -> None:
