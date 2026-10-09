@@ -87,6 +87,14 @@ class SiteSettings(models.Model):
         ),
     )
     bale_webhook_secret = models.CharField(max_length=64, default=_new_secret, editable=False)
+    bale_welcome_message = models.TextField(
+        "پیام خوش‌آمدگویی ربات بله",
+        blank=True,
+        help_text=(
+            "این پیام وقتی کاربر ربات را برای اولین بار باز می‌کند (بدون لینک سفارش) نشان داده می‌شود. "
+            "خالی = پیام پیش‌فرض."
+        ),
+    )
 
     seller_name = models.CharField(
         "نام فروشنده (روی فاکتور)", max_length=150, blank=True, help_text="خالی = نام سایت"

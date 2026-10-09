@@ -40,7 +40,7 @@ class SiteSettingsAdmin(admin.ModelAdmin):
         (
             "پرداخت با ربات بله",
             {
-                "fields": ("bale_bot_token", "bale_bot_username", "bale_provider_token"),
+                "fields": ("bale_bot_token", "bale_bot_username", "bale_provider_token", "bale_welcome_message"),
                 "description": (
                     "۱. توکن ربات و نام کاربری ربات را از @botfather در بله بگیرید و وارد کنید.\n"
                     "۲. تنظیمات را ذخیره کنید.\n"
