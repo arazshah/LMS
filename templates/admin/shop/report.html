@@ -17,10 +17,10 @@
 
 {% block content %}
 <div class="r-grid">
-  <div class="r-card"><div class="s">امروز</div><div class="v">{{ today.revenue|toman }}</div><div class="s">{{ today.count|fa_num }} سفارش</div></div>
-  <div class="r-card"><div class="s">این ماه</div><div class="v">{{ this_month.revenue|toman }}</div><div class="s">{{ this_month.count|fa_num }} سفارش</div></div>
-  <div class="r-card"><div class="s">۳۰ روز اخیر</div><div class="v">{{ last_30.revenue|toman }}</div><div class="s">{{ last_30.count|fa_num }} سفارش</div></div>
-  <div class="r-card"><div class="s">کل</div><div class="v">{{ all_time.revenue|toman }}</div><div class="s">{{ all_time.count|fa_num }} سفارش</div></div>
+  <div class="r-card"><div class="s">امروز</div><div class="v">{{ today.revenue|money }}</div><div class="s">{{ today.count|fa_num }} سفارش</div></div>
+  <div class="r-card"><div class="s">این ماه</div><div class="v">{{ this_month.revenue|money }}</div><div class="s">{{ this_month.count|fa_num }} سفارش</div></div>
+  <div class="r-card"><div class="s">۳۰ روز اخیر</div><div class="v">{{ last_30.revenue|money }}</div><div class="s">{{ last_30.count|fa_num }} سفارش</div></div>
+  <div class="r-card"><div class="s">کل</div><div class="v">{{ all_time.revenue|money }}</div><div class="s">{{ all_time.count|fa_num }} سفارش</div></div>
   <div class="r-card"><div class="s">کاربران / دانشجویان فعال</div><div class="v">{{ users|fa_num }} / {{ active_students|fa_num }}</div>
     {% if pending_review %}<div class="s"><a href="{% url 'admin:shop_order_changelist' %}?status__exact=review">{{ pending_review|fa_num }} رسید منتظر بررسی</a></div>{% endif %}</div>
 </div>
@@ -30,7 +30,7 @@
     <table>
       <caption>درآمد ماهانه (۱۲ ماه اخیر)</caption>
       <thead><tr><th>ماه</th><th>سفارش</th><th>درآمد</th></tr></thead>
-      <tbody>{% for m in monthly %}<tr><td>{{ m.label|fa_num }}</td><td>{{ m.count|fa_num }}</td><td class="r-num">{{ m.revenue|toman }}</td></tr>{% endfor %}</tbody>
+      <tbody>{% for m in monthly %}<tr><td>{{ m.label|fa_num }}</td><td>{{ m.count|fa_num }}</td><td class="r-num">{{ m.revenue|money }}</td></tr>{% endfor %}</tbody>
     </table>
   </div>
 
@@ -39,14 +39,14 @@
       <table>
         <caption>به تفکیک نوع محصول</caption>
         <thead><tr><th>نوع</th><th>سفارش</th><th>درآمد</th></tr></thead>
-        <tbody>{% for label, row in by_type.items %}<tr><td>{{ label }}</td><td>{{ row.count|fa_num }}</td><td class="r-num">{{ row.revenue|toman }}</td></tr>{% endfor %}</tbody>
+        <tbody>{% for label, row in by_type.items %}<tr><td>{{ label }}</td><td>{{ row.count|fa_num }}</td><td class="r-num">{{ row.revenue|money }}</td></tr>{% endfor %}</tbody>
       </table>
     </div>
     <div class="module" style="margin-top:24px">
       <table>
         <caption>روش پرداخت</caption>
         <thead><tr><th>روش</th><th>سفارش</th><th>درآمد</th></tr></thead>
-        <tbody>{% for row in methods %}<tr><td>{{ row.label }}</td><td>{{ row.count|fa_num }}</td><td class="r-num">{{ row.revenue|toman }}</td></tr>{% empty %}<tr><td colspan="3">—</td></tr>{% endfor %}</tbody>
+        <tbody>{% for row in methods %}<tr><td>{{ row.label }}</td><td>{{ row.count|fa_num }}</td><td class="r-num">{{ row.revenue|money }}</td></tr>{% empty %}<tr><td colspan="3">—</td></tr>{% endfor %}</tbody>
       </table>
     </div>
   </div>
@@ -55,7 +55,7 @@
     <table>
       <caption>پرفروش‌ترین‌ها</caption>
       <thead><tr><th>محصول</th><th>سفارش</th><th>درآمد</th></tr></thead>
-      <tbody>{% for row in top_products %}<tr><td>{{ row.title }}</td><td>{{ row.count|fa_num }}</td><td class="r-num">{{ row.revenue|toman }}</td></tr>{% empty %}<tr><td colspan="3">هنوز فروشی ثبت نشده است.</td></tr>{% endfor %}</tbody>
+      <tbody>{% for row in top_products %}<tr><td>{{ row.title }}</td><td>{{ row.count|fa_num }}</td><td class="r-num">{{ row.revenue|money }}</td></tr>{% empty %}<tr><td colspan="3">هنوز فروشی ثبت نشده است.</td></tr>{% endfor %}</tbody>
     </table>
   </div>
 
@@ -63,7 +63,7 @@
     <table>
       <caption>کدهای تخفیف</caption>
       <thead><tr><th>کد</th><th>استفاده</th><th>مجموع تخفیف</th><th>درآمد</th></tr></thead>
-      <tbody>{% for row in discounts %}<tr><td>{{ row.discount_code__code }}</td><td>{{ row.count|fa_num }}</td><td class="r-num">{{ row.discount|toman }}</td><td class="r-num">{{ row.revenue|toman }}</td></tr>{% empty %}<tr><td colspan="4">—</td></tr>{% endfor %}</tbody>
+      <tbody>{% for row in discounts %}<tr><td>{{ row.discount_code__code }}</td><td>{{ row.count|fa_num }}</td><td class="r-num">{{ row.discount|money }}</td><td class="r-num">{{ row.revenue|money }}</td></tr>{% empty %}<tr><td colspan="4">—</td></tr>{% endfor %}</tbody>
     </table>
   </div>
 </div>

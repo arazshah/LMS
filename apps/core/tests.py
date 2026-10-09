@@ -31,3 +31,10 @@ def test_persian_filters():
     assert toman(1500000) == "۱٬۵۰۰٬۰۰۰ تومان"
     assert toman(0) == "رایگان"
     assert jdate(date(2026, 3, 21)) == "۱۴۰۵/۰۱/۰۱"
+
+
+def test_money_filter_shows_zero():
+    from apps.core.templatetags.fa import money
+
+    assert money(0) == "۰ تومان"
+    assert money(1500000) == "۱٬۵۰۰٬۰۰۰ تومان"

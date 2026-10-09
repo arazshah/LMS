@@ -35,3 +35,9 @@ def jdate(value, fmt="%Y/%m/%d"):
     else:
         converted = jdatetime.date.fromgregorian(date=value)
     return converted.strftime(fmt).translate(_FA_DIGITS)
+
+
+@register.filter
+def money(value):
+    """Amount in toman for reports: 0 -> «۰ تومان» (unlike `toman`, which says «رایگان»)."""
+    return f"{int(value or 0):,}".replace(",", "٬").translate(_FA_DIGITS) + " تومان"
