@@ -115,14 +115,35 @@ def _order_from_payload(payload: str | None) -> Order | None:
     return None
 
 
+_DEFAULT_WELCOME = (
+    "سلام! 👋\n\n"
+    "این ربات فقط برای پرداخت سفارش‌های سایت استفاده می‌شود.\n\n"
+    "برای پرداخت:\n"
+    "۱. از سایت وارد صفحه سفارش شوید\n"
+    "۲. روی «پرداخت با بله» بزنید\n"
+    "۳. ربات فاکتور پرداخت را برای شما می‌فرستد\n\n"
+    "همچنین می‌توانید شماره سفارش خود را اینجا بفرستید."
+)
+
+
 def _handle_text(message: dict) -> None:
     chat_id = message["chat"]["id"]
-    order = _find_order_in_text(message.get("text", ""))
+    text = message.get("text", "")
+
+    # Plain /start (no token) → welcome message
+    if text.strip() in ("/start", "/start@" + (SiteSettings.load().bale_bot_username or "")):
+        config = SiteSettings.load()
+        welcome = config.bale_welcome_message.strip() or _DEFAULT_WELCOME
+        send_message(chat_id, welcome)
+        return
+
+    order = _find_order_in_text(text)
     if order is None:
+        # Unknown message — bot is payment-only, do not engage
         send_message(
             chat_id,
-            "سلام! برای پرداخت، از صفحه سفارش در سایت روی «پرداخت با بله» بزنید "
-            "یا شماره سفارش را همین‌جا بفرستید.",
+            "این ربات فقط برای پرداخت سفارش است.\n"
+            "شماره سفارش خود را بفرستید یا از سایت روی «پرداخت با بله» بزنید.",
         )
         return
     if order.is_paid:
