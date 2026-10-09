@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% load fa %}
+
+{% block title %}سفارش‌های من | {{ site.site_name }}{% endblock %}
+
+{% block content %}
+<h1 class="mb-6 text-2xl font-extrabold">سفارش‌های من</h1>
+{% if orders %}
+  <div class="overflow-x-auto rounded-2xl bg-white ring-1 ring-slate-200">
+    <table class="w-full text-sm">
+      <thead class="bg-slate-50 text-slate-600"><tr>
+        <th class="px-4 py-3 text-right">شماره</th><th class="px-4 py-3 text-right">محصول</th>
+        <th class="px-4 py-3 text-right">مبلغ</th><th class="px-4 py-3 text-right">تاریخ</th>
+        <th class="px-4 py-3 text-right">وضعیت</th><th class="px-4 py-3"></th>
+      </tr></thead>
+      <tbody class="divide-y divide-slate-100">
+        {% for order in orders %}
+          <tr>
+            <td class="px-4 py-3">{{ order.number|fa_num }}</td>
+            <td class="px-4 py-3">{{ order.title }}</td>
+            <td class="px-4 py-3 whitespace-nowrap">{{ order.total|toman }}</td>
+            <td class="px-4 py-3 whitespace-nowrap">{{ order.created_at|jdate }}</td>
+            <td class="px-4 py-3">{{ order.get_status_display }}</td>
+            <td class="px-4 py-3 whitespace-nowrap">
+              {% if order.is_paid %}<a href="{% url 'shop:order_invoice' order.number %}" class="text-emerald-700 hover:underline">فاکتور</a>
+              {% elif order.can_pay %}<a href="{{ order.get_absolute_url }}" class="text-emerald-700 hover:underline">پرداخت</a>
+              {% else %}<a href="{{ order.get_absolute_url }}" class="text-slate-500 hover:underline">جزئیات</a>{% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% else %}
+  <p class="rounded-2xl bg-white p-8 text-center text-slate-500 ring-1 ring-slate-200">هنوز سفارشی ثبت نکرده‌اید.</p>
+{% endif %}
+{% endblock %}

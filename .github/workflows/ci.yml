@@ -29,7 +29,7 @@ jobs:
           cache: pip
           cache-dependency-path: requirements*.txt
       - name: Install ffmpeg (video transcoding tests)
-        run: sudo apt-get update -q && sudo apt-get install -y -q ffmpeg
+        run: sudo apt-get update -q && sudo apt-get install -y -q ffmpeg libpango-1.0-0 libpangoft2-1.0-0 libharfbuzz-subset0
       - run: pip install -r requirements-dev.txt
       - name: Lint
         run: |
@@ -64,3 +64,8 @@ jobs:
           assert Path(\"/tmp/hls/master.m3u8\").is_file()
           print(\"transcode ok\", info)
           "'
+      - name: Render a Persian PDF with the image's WeasyPrint
+        run: >-
+          docker run --rm lms:ci python -c
+          "from weasyprint import HTML; pdf = HTML(string='<p dir=rtl>فاکتور</p>').write_pdf();
+          assert pdf.startswith(b'%PDF'); print('pdf ok', len(pdf))"

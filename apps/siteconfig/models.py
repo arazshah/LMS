@@ -1,7 +1,13 @@
+import secrets
+
 from django.core.cache import cache
 from django.db import models
 
 CACHE_KEY = "siteconfig:settings"
+
+
+def _new_secret():
+    return secrets.token_urlsafe(32)
 
 
 class SiteSettings(models.Model):
@@ -32,6 +38,32 @@ class SiteSettings(models.Model):
         "نام پارامتر کد در قالب", max_length=50, default="CODE", help_text="مثلاً CODE برای #CODE#"
     )
 
+    card_number = models.CharField(
+        "شماره کارت (کارت‌به‌کارت)", max_length=30, blank=True, help_text="به خریدار نمایش داده می‌شود"
+    )
+    card_holder = models.CharField("نام صاحب کارت", max_length=100, blank=True)
+    card_bank = models.CharField("نام بانک", max_length=50, blank=True)
+
+    bale_bot_token = models.CharField(
+        "توکن ربات بله", max_length=200, blank=True, help_text="از ‎@botfather در بله"
+    )
+    bale_bot_username = models.CharField(
+        "نام کاربری ربات بله", max_length=100, blank=True, help_text="بدون @، مثلاً araz_lms_bot"
+    )
+    bale_provider_token = models.CharField(
+        "شماره کارت یا توکن کیف پول برای پرداخت بله",
+        max_length=100,
+        blank=True,
+        help_text="پول پرداخت‌شده در بله به این کارت/کیف پول واریز می‌شود",
+    )
+    bale_webhook_secret = models.CharField(max_length=64, default=_new_secret, editable=False)
+
+    seller_name = models.CharField(
+        "نام فروشنده (روی فاکتور)", max_length=150, blank=True, help_text="خالی = نام سایت"
+    )
+    seller_phone = models.CharField("تلفن فروشنده (روی فاکتور)", max_length=30, blank=True)
+    seller_address = models.CharField("آدرس فروشنده (روی فاکتور)", max_length=300, blank=True)
+
     class Meta:
         verbose_name = "تنظیمات سایت"
         verbose_name_plural = "تنظیمات سایت"
@@ -50,6 +82,14 @@ class SiteSettings(models.Model):
     @property
     def sms_configured(self):
         return bool(self.sms_api_key and self.sms_otp_template_id)
+
+    @property
+    def bale_configured(self):
+        return bool(self.bale_bot_token and self.bale_bot_username and self.bale_provider_token)
+
+    @property
+    def card_configured(self):
+        return bool(self.card_number)
 
     @classmethod
     def load(cls):

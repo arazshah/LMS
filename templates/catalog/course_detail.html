@@ -70,14 +70,15 @@
             {% elif enrollment %}شما به این دوره دسترسی دارید{% if enrollment.expires_at %} تا {{ enrollment.expires_at|jdate }}{% endif %}.
             {% else %}شما به این دوره دسترسی دارید.{% endif %}
           </div>
-        {% else %}
-          <div class="rounded-lg bg-slate-50 p-3 text-slate-700">
-            برای خرید این دوره با پشتیبانی تماس بگیرید{% if site.support_telegram %}: <span dir="ltr">{{ site.support_telegram }}</span>{% elif site.support_phone %}: <span dir="ltr">{{ site.support_phone }}</span>{% endif %}.
-          </div>
-          {% if not user.is_authenticated %}
-            <a href="{% url 'accounts:login' %}?next={{ request.path|urlencode }}" class="block rounded-lg bg-emerald-600 py-3 text-center font-bold text-white hover:bg-emerald-700">ورود / ثبت‌نام</a>
+          {% if enrollment.expires_at and not user.is_staff %}
+            <a href="{% url 'shop:checkout' 'course' course.slug %}" class="block rounded-lg border border-emerald-600 py-2 text-center text-emerald-700 hover:bg-emerald-50">تمدید دسترسی</a>
           {% endif %}
+        {% else %}
+          <a href="{% url 'shop:checkout' 'course' course.slug %}" class="block rounded-lg bg-emerald-600 py-3 text-center font-bold text-white hover:bg-emerald-700">خرید دوره</a>
         {% endif %}
+        {% for bundle in bundles %}
+          <a href="{{ bundle.get_absolute_url }}" class="block rounded-lg bg-sky-50 p-3 text-sky-800 hover:bg-sky-100">این دوره در پکیج «{{ bundle.title }}» هم هست — {{ bundle.price|toman }}</a>
+        {% endfor %}
       </div>
     </div>
   </aside>

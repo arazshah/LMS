@@ -43,6 +43,7 @@ def course_detail(request, slug):
             "has_access": course.has_access(request.user),
             "enrollment": enrollment,
             "prerequisites": course.prerequisites.filter(is_published=True),
+            "bundles": course.bundles.filter(is_published=True),
         },
     )
 

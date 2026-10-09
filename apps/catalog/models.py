@@ -219,6 +219,14 @@ class Enrollment(models.Model):
         help_text="اگر خالی بماند، طبق «مدت دسترسی» دوره محاسبه می‌شود (یا دائمی).",
     )
     source = models.CharField("منبع", max_length=20, choices=Source, default=Source.MANUAL)
+    order = models.ForeignKey(
+        "shop.Order",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="enrollments",
+        verbose_name="سفارش",
+    )
     note = models.CharField("یادداشت", max_length=255, blank=True)
     created_at = models.DateTimeField("ایجاد", auto_now_add=True)
 

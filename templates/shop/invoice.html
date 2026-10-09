@@ -1,0 +1,48 @@
+{% load fa %}<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<style>
+  {% if font_url %}@font-face { font-family: "Vazirmatn"; src: url("{{ font_url }}"); }{% endif %}
+  @page { size: A5; margin: 14mm; }
+  body { font-family: "Vazirmatn", sans-serif; font-size: 10.5pt; color: #1e293b; }
+  h1 { font-size: 16pt; margin: 0 0 4mm; color: #047857; }
+  .muted { color: #64748b; }
+  .row { display: flex; justify-content: space-between; }
+  .box { border: 1px solid #e2e8f0; border-radius: 3mm; padding: 4mm; margin-top: 4mm; }
+  table { width: 100%; border-collapse: collapse; margin-top: 4mm; }
+  th, td { border-bottom: 1px solid #e2e8f0; padding: 2.5mm 1mm; text-align: right; }
+  th { background: #f1f5f9; }
+  .total td { font-weight: bold; font-size: 12pt; border-bottom: 0; }
+  .ltr { direction: ltr; }
+</style>
+</head>
+<body>
+  <div class="row">
+    <div>
+      <h1>فاکتور فروش</h1>
+      <div>{{ site.seller_name|default:site.site_name }}</div>
+      {% if site.seller_phone %}<div class="muted">تلفن: <span class="ltr">{{ site.seller_phone|fa_num }}</span></div>{% endif %}
+      {% if site.seller_address %}<div class="muted">{{ site.seller_address }}</div>{% endif %}
+    </div>
+    <div style="text-align:left">
+      <div>شماره: {{ order.number|fa_num }}</div>
+      <div>تاریخ: {{ order.paid_at|jdate }}</div>
+    </div>
+  </div>
+
+  <div class="box">
+    <div>خریدار: {{ order.user.get_full_name|default:"—" }}</div>
+    <div>موبایل: <span class="ltr">{{ order.user.phone|fa_num }}</span></div>
+  </div>
+
+  <table>
+    <tr><th>شرح</th><th style="width:35%">مبلغ</th></tr>
+    <tr><td>{% if order.bundle_id %}پکیج{% else %}دوره{% endif %}: {{ order.title }}</td><td>{{ order.amount|toman }}</td></tr>
+    {% if order.discount_amount %}<tr><td>تخفیف{% if order.discount_code %} ({{ order.discount_code.code }}){% endif %}</td><td>{{ order.discount_amount|toman }}</td></tr>{% endif %}
+    <tr class="total"><td>مبلغ پرداخت‌شده</td><td>{{ order.total|toman }}</td></tr>
+  </table>
+
+  <p class="muted" style="margin-top:6mm">روش پرداخت: {{ order.get_payment_method_display }}{% if order.payment_ref %} — شناسه: <span class="ltr">{{ order.payment_ref }}</span>{% endif %}</p>
+</body>
+</html>

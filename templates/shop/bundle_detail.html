@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% load fa %}
+
+{% block title %}{{ bundle.title }} | {{ site.site_name }}{% endblock %}
+
+{% block content %}
+<div class="grid gap-8 lg:grid-cols-3">
+  <div class="lg:col-span-2">
+    <nav class="mb-3 text-sm text-slate-500"><a href="{% url 'shop:bundle_list' %}" class="hover:text-emerald-700">پکیج‌ها</a></nav>
+    <h1 class="text-3xl font-extrabold text-slate-900">{{ bundle.title }}</h1>
+    {% if bundle.summary %}<p class="mt-3 text-lg text-slate-600">{{ bundle.summary }}</p>{% endif %}
+    {% if bundle.description %}<div class="mt-6 leading-8 text-slate-700">{{ bundle.description|linebreaks }}</div>{% endif %}
+    <h2 class="mb-4 mt-10 text-xl font-bold">دوره‌های این پکیج</h2>
+    <div class="grid gap-6 sm:grid-cols-2">
+      {% for course in courses %}{% include "catalog/_course_card.html" %}{% endfor %}
+    </div>
+  </div>
+  <aside class="lg:sticky lg:top-6 lg:self-start">
+    <div class="space-y-3 rounded-2xl bg-white p-5 text-sm shadow-sm ring-1 ring-slate-200">
+      {% with original=bundle.original_price %}
+        {% if original > bundle.price %}
+          <div class="flex justify-between"><span class="text-slate-500">قیمت جداگانه</span><span class="text-slate-400 line-through">{{ original|toman }}</span></div>
+        {% endif %}
+      {% endwith %}
+      <div class="flex justify-between text-base font-bold"><span>قیمت پکیج</span><span>{{ bundle.price|toman }}</span></div>
+      <div class="flex justify-between"><span class="text-slate-500">مدت دسترسی</span><span>{% if bundle.access_days %}{{ bundle.access_days|fa_num }} روز{% else %}طبق هر دوره{% endif %}</span></div>
+      <a href="{% url 'shop:checkout' 'bundle' bundle.slug %}" class="block rounded-lg bg-emerald-600 py-3 text-center font-bold text-white hover:bg-emerald-700">خرید پکیج</a>
+    </div>
+  </aside>
+</div>
+{% endblock %}

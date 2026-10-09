@@ -1,0 +1,17 @@
+{% load fa %}
+<a href="{{ bundle.get_absolute_url }}" class="group flex flex-col overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200 transition hover:shadow-md">
+  {% if bundle.cover %}
+    <img src="{{ bundle.cover.url }}" alt="{{ bundle.title }}" class="aspect-video w-full object-cover">
+  {% else %}
+    <div class="flex aspect-video w-full items-center justify-center bg-gradient-to-br from-sky-700 to-indigo-900 p-4 text-center text-lg font-bold text-white">{{ bundle.title }}</div>
+  {% endif %}
+  <div class="flex flex-1 flex-col p-5">
+    <span class="mb-2 w-fit rounded-full bg-sky-50 px-2 py-1 text-xs text-sky-700">پکیج · {{ bundle.courses.count|fa_num }} دوره</span>
+    <h3 class="font-bold text-slate-900 group-hover:text-emerald-700">{{ bundle.title }}</h3>
+    {% if bundle.summary %}<p class="mt-2 line-clamp-2 text-sm text-slate-600">{{ bundle.summary }}</p>{% endif %}
+    <p class="mt-auto pt-4 text-sm">
+      {% with original=bundle.original_price %}{% if original > bundle.price %}<span class="text-slate-400 line-through">{{ original|toman }}</span> {% endif %}{% endwith %}
+      <span class="font-bold text-slate-900">{{ bundle.price|toman }}</span>
+    </p>
+  </div>
+</a>

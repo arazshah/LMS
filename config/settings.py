@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     "apps.siteconfig",
     "apps.catalog",
     "apps.videos",
+    "apps.shop",
 ]
 
 MIDDLEWARE = [
@@ -151,4 +152,6 @@ LOGGING = {
     "disable_existing_loggers": False,
     "handlers": {"console": {"class": "logging.StreamHandler"}},
     "root": {"handlers": ["console"], "level": env("LOG_LEVEL", default="INFO")},
+    # PDF rendering libraries are very chatty at INFO level.
+    "loggers": {name: {"level": "WARNING"} for name in ("fontTools", "weasyprint")},
 }

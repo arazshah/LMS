@@ -1,0 +1,13 @@
+{% extends "admin/index.html" %}
+
+{% block content %}
+  {% load shop_admin %}
+  {% pending_receipts as pending %}
+  {% if pending %}
+    <div style="background:#fef3c7;color:#92400e;padding:12px 16px;border-radius:6px;margin-bottom:16px">
+      {{ pending }} رسید کارت‌به‌کارت منتظر بررسی است —
+      <a href="{% url 'admin:shop_order_changelist' %}?status__exact=review" style="font-weight:bold">بررسی سفارش‌ها</a>
+    </div>
+  {% endif %}
+  {{ block.super }}
+{% endblock %}
