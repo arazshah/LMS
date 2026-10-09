@@ -8,11 +8,16 @@
 </head>
 <body class="flex min-h-screen items-center justify-center bg-slate-50 p-4 font-sans text-slate-800">
   {# Rendered without request context: keep it free of database lookups. #}
-  <div class="max-w-md rounded-2xl bg-white p-10 text-center ring-1 ring-slate-200">
-    <p class="text-6xl font-extrabold text-emerald-700">۵۰۰</p>
-    <h1 class="mt-4 text-xl font-bold">مشکلی پیش آمد.</h1>
-    <p class="mt-2 text-slate-600">خطا ثبت شد و بررسی می‌شود. چند دقیقه دیگر دوباره تلاش کنید.</p>
-    <a href="/" class="mt-6 inline-block rounded-lg bg-emerald-600 px-5 py-2 font-bold text-white">صفحه اصلی</a>
+  <div class="max-w-md text-center">
+    <p class="text-[6rem] font-extrabold leading-none text-slate-100">۵۰۰</p>
+    <div class="-mt-6 relative z-10">
+      <svg class="mx-auto h-20 w-20 text-red-500 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+    </div>
+    <h1 class="mt-4 text-2xl font-extrabold text-slate-900">مشکلی پیش آمد</h1>
+    <p class="mt-2 text-slate-500">خطا ثبت شد و بررسی می‌شود. چند دقیقه دیگر دوباره تلاش کنید.</p>
+    <a href="/" class="mt-8 inline-block rounded-xl bg-emerald-500 px-6 py-2.5 font-bold text-white shadow-lg shadow-emerald-500/20 transition hover:bg-emerald-400">
+      صفحه اصلی
+    </a>
   </div>
 </body>
 </html>

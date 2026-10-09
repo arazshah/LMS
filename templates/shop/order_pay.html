@@ -4,62 +4,129 @@
 {% block title %}سفارش {{ order.number|fa_num }} | {{ site.site_name }}{% endblock %}
 
 {% block content %}
-<div class="mx-auto max-w-2xl space-y-6">
+<div class="mx-auto max-w-2xl space-y-5">
+
+  <!-- Order header -->
   <div class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
-    <div class="flex flex-wrap items-center justify-between gap-2">
-      <h1 class="text-xl font-extrabold">سفارش {{ order.number|fa_num }}</h1>
-      <span class="rounded-full px-3 py-1 text-sm {% if order.is_paid %}bg-emerald-50 text-emerald-700{% elif order.status == 'review' %}bg-amber-50 text-amber-800{% elif order.status == 'rejected' %}bg-red-50 text-red-700{% else %}bg-slate-100 text-slate-700{% endif %}">{{ order.get_status_display }}</span>
+    <div class="flex flex-wrap items-center justify-between gap-3">
+      <div>
+        <p class="text-xs text-slate-400">شماره سفارش</p>
+        <h1 class="text-xl font-extrabold text-slate-900" dir="ltr">{{ order.number|fa_num }}</h1>
+      </div>
+      <span class="rounded-full px-3.5 py-1.5 text-sm font-medium
+        {% if order.is_paid %}bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200
+        {% elif order.status == 'review' %}bg-amber-50 text-amber-700 ring-1 ring-amber-200
+        {% elif order.status == 'rejected' %}bg-red-50 text-red-700 ring-1 ring-red-200
+        {% else %}bg-slate-100 text-slate-600{% endif %}">
+        {{ order.get_status_display }}
+      </span>
     </div>
-    <p class="mt-3">{{ order.title }}</p>
-    <p class="mt-1 text-lg font-bold">مبلغ: {{ order.total|toman }}</p>
-    {% if order.status == "rejected" and order.admin_note %}<p class="mt-2 text-sm text-red-700">علت: {{ order.admin_note }}</p>{% endif %}
+    <p class="mt-3 font-medium text-slate-700">{{ order.title }}</p>
+    <p class="mt-1 text-2xl font-extrabold text-slate-900">{{ order.total|toman }}</p>
+    {% if order.status == "rejected" and order.admin_note %}
+      <p class="mt-3 flex items-center gap-2 rounded-xl bg-red-50 px-4 py-2.5 text-sm text-red-700">
+        <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        علت رد: {{ order.admin_note }}
+      </p>
+    {% endif %}
   </div>
 
+  <!-- Paid state -->
   {% if order.is_paid %}
-    <div class="rounded-2xl bg-emerald-50 p-6 text-emerald-900">
-      <p class="font-bold">پرداخت انجام شد و دسترسی شما فعال است. ✅</p>
+    <div class="rounded-2xl bg-emerald-50 p-6 ring-1 ring-emerald-200">
+      <div class="flex items-center gap-3">
+        <span class="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500 text-white">
+          <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+        </span>
+        <p class="font-bold text-emerald-900">پرداخت انجام شد و دسترسی شما فعال است.</p>
+      </div>
       <div class="mt-4 flex flex-wrap gap-3">
-        <a href="{% url 'catalog:my_courses' %}" class="rounded-lg bg-emerald-600 px-5 py-2 font-bold text-white hover:bg-emerald-700">دوره‌های من</a>
-        <a href="{% url 'shop:order_invoice' order.number %}" class="rounded-lg border border-emerald-600 px-5 py-2 text-emerald-800 hover:bg-white">دانلود فاکتور (PDF)</a>
+        <a href="{% url 'catalog:my_courses' %}"
+           class="rounded-xl bg-emerald-500 px-5 py-2.5 font-bold text-white shadow-sm transition hover:bg-emerald-400">
+          دوره‌های من
+        </a>
+        <a href="{% url 'shop:order_invoice' order.number %}"
+           class="rounded-xl border border-emerald-400 px-5 py-2.5 font-medium text-emerald-700 transition hover:bg-white">
+          دانلود فاکتور (PDF)
+        </a>
       </div>
     </div>
+
+  <!-- Under review -->
   {% elif order.status == "review" %}
-    <div class="rounded-2xl bg-amber-50 p-6 text-amber-900">رسید شما دریافت شد و در حال بررسی است. پس از تأیید، دسترسی به‌صورت خودکار فعال می‌شود.</div>
+    <div class="flex items-start gap-3 rounded-2xl bg-amber-50 p-5 ring-1 ring-amber-200">
+      <svg class="mt-0.5 h-5 w-5 shrink-0 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      <p class="text-amber-900">رسید شما دریافت شد و در حال بررسی است. پس از تأیید، دسترسی به‌صورت خودکار فعال می‌شود.</p>
+    </div>
+
+  <!-- Can pay -->
   {% elif order.can_pay %}
     <div hx-get="{% url 'shop:order_status' order.number %}" hx-trigger="every 5s"></div>
 
+    <!-- Bale payment -->
     {% if bale_link %}
-    <section class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
-      <h2 class="text-lg font-bold">روش ۱: پرداخت در پیام‌رسان بله (پیشنهادی)</h2>
-      <p class="mt-2 text-sm text-slate-600">با زدن دکمه زیر، ربات ما در بله باز می‌شود و فاکتور پرداخت را برایتان می‌فرستد. بعد از پرداخت، دسترسی خودکار فعال می‌شود و این صفحه به‌روز می‌شود.</p>
-      <a href="{{ bale_link }}" target="_blank" rel="noopener" class="mt-4 inline-block rounded-lg bg-sky-600 px-6 py-3 font-bold text-white hover:bg-sky-700">پرداخت با بله</a>
-      <p class="mt-3 text-xs text-slate-500">اگر ربات فاکتور نفرستاد، شماره سفارش <b dir="ltr">{{ order.number }}</b> را در ربات بفرستید.</p>
+    <section class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200">
+      <div class="border-b border-slate-100 bg-sky-50 px-5 py-3">
+        <span class="text-sm font-bold text-sky-800">روش ۱: پرداخت در پیام‌رسان بله (پیشنهادی)</span>
+      </div>
+      <div class="p-5">
+        <p class="text-sm text-slate-600">با زدن دکمه زیر، ربات ما در بله باز می‌شود و فاکتور پرداخت را برایتان می‌فرستد. بعد از پرداخت، دسترسی خودکار فعال می‌شود.</p>
+        <a href="{{ bale_link }}" target="_blank" rel="noopener"
+           class="mt-4 inline-flex items-center gap-2 rounded-xl bg-sky-600 px-6 py-3 font-bold text-white shadow-sm transition hover:bg-sky-500">
+          <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+          پرداخت با بله
+        </a>
+        <p class="mt-3 text-xs text-slate-400">
+          اگر ربات فاکتور نفرستاد، شماره سفارش
+          <b dir="ltr" class="text-slate-600">{{ order.number }}</b>
+          را در ربات بفرستید.
+        </p>
+      </div>
     </section>
     {% endif %}
 
+    <!-- Card-to-card -->
     {% if site.card_configured %}
-    <section class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
-      <h2 class="text-lg font-bold">{% if bale_link %}روش ۲: {% endif %}کارت‌به‌کارت</h2>
-      <p class="mt-2 text-sm text-slate-600">مبلغ <b>{{ order.total|toman }}</b> را به کارت زیر واریز کنید و تصویر رسید را بفرستید:</p>
-      <div class="mt-4 rounded-xl bg-slate-50 p-4 text-center">
-        <p class="text-xl font-bold tracking-widest" dir="ltr">{{ site.card_number }}</p>
-        {% if site.card_holder %}<p class="mt-1 text-sm text-slate-600">به نام {{ site.card_holder }}{% if site.card_bank %} — {{ site.card_bank }}{% endif %}</p>{% endif %}
+    <section class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200">
+      <div class="border-b border-slate-100 bg-slate-50 px-5 py-3">
+        <span class="text-sm font-bold text-slate-700">{% if bale_link %}روش ۲: {% endif %}کارت‌به‌کارت</span>
       </div>
-      <form method="post" enctype="multipart/form-data" class="mt-4 space-y-3">
-        {% csrf_token %}
-        <label class="block text-sm font-medium">{{ form.receipt.label }}</label>
-        {{ form.receipt }}
-        {% for error in form.receipt.errors %}<p class="text-sm text-red-600">{{ error }}</p>{% endfor %}
-        <label class="block text-sm font-medium">{{ form.receipt_ref.label }}</label>
-        {{ form.receipt_ref }}
-        <button class="w-full rounded-lg bg-emerald-600 py-3 font-bold text-white hover:bg-emerald-700">ارسال رسید</button>
-      </form>
+      <div class="p-5">
+        <p class="text-sm text-slate-600">مبلغ <b class="text-slate-800">{{ order.total|toman }}</b> را به کارت زیر واریز کنید و تصویر رسید را آپلود کنید:</p>
+        <div class="mt-4 rounded-xl bg-slate-50 p-4 text-center ring-1 ring-slate-200">
+          <p class="text-xl font-bold tracking-widest text-slate-900" dir="ltr">{{ site.card_number }}</p>
+          {% if site.card_holder %}
+            <p class="mt-1 text-sm text-slate-500">
+              به نام {{ site.card_holder }}{% if site.card_bank %} — {{ site.card_bank }}{% endif %}
+            </p>
+          {% endif %}
+        </div>
+
+        <form method="post" enctype="multipart/form-data" class="mt-5 space-y-4">
+          {% csrf_token %}
+          <div>
+            <label class="mb-1.5 block text-sm font-medium text-slate-700">{{ form.receipt.label }}</label>
+            {{ form.receipt }}
+            {% for error in form.receipt.errors %}<p class="mt-1 text-sm text-red-500">{{ error }}</p>{% endfor %}
+          </div>
+          <div>
+            <label class="mb-1.5 block text-sm font-medium text-slate-700">{{ form.receipt_ref.label }}</label>
+            {{ form.receipt_ref }}
+          </div>
+          <button class="w-full rounded-xl bg-emerald-500 py-3 font-bold text-white shadow-lg shadow-emerald-500/20 transition hover:bg-emerald-400">
+            ارسال رسید
+          </button>
+        </form>
+      </div>
     </section>
     {% endif %}
 
     {% if not bale_link and not site.card_configured %}
-      <div class="rounded-2xl bg-slate-50 p-6 text-slate-700">روش پرداخت هنوز تنظیم نشده است. لطفاً با پشتیبانی تماس بگیرید{% if site.support_telegram %}: <span dir="ltr">{{ site.support_telegram }}</span>{% endif %}.</div>
+      <div class="rounded-2xl bg-slate-50 p-6 text-center text-slate-500 ring-1 ring-slate-200">
+        <p>روش پرداخت هنوز تنظیم نشده است. لطفاً با پشتیبانی تماس بگیرید{% if site.support_telegram %}: <span dir="ltr" class="font-medium">{{ site.support_telegram }}</span>{% endif %}.</p>
+      </div>
     {% endif %}
   {% endif %}
+
 </div>
 {% endblock %}

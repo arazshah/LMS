@@ -4,44 +4,86 @@
 {% block title %}دوره‌های من | {{ site.site_name }}{% endblock %}
 
 {% block content %}
-<h1 class="mb-6 text-2xl font-extrabold">دوره‌های من</h1>
+<h1 class="mb-8 text-2xl font-extrabold text-slate-900">دوره‌های من</h1>
 
-{% if active or live %}{% if active %}
-  <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-    {% for enrollment in active %}
-      <a href="{{ enrollment.course.get_absolute_url }}" class="rounded-2xl bg-white p-5 ring-1 ring-slate-200 hover:ring-emerald-500">
-        <h2 class="font-bold">{{ enrollment.course.title }}</h2>
-        <p class="mt-2 text-sm text-slate-500">{% if enrollment.expires_at %}دسترسی تا {{ enrollment.expires_at|jdate }}{% else %}دسترسی دائمی{% endif %}</p>
-      </a>
-    {% endfor %}
-  </div>
-{% endif %}{% else %}
-  <div class="rounded-2xl bg-white p-8 text-center ring-1 ring-slate-200">
-    <p class="text-slate-600">هنوز دوره‌ای ندارید.</p>
-    <a href="{% url 'catalog:course_list' %}" class="mt-4 inline-block rounded-lg bg-emerald-600 px-6 py-3 font-bold text-white hover:bg-emerald-700">مشاهده دوره‌ها</a>
+{% if active or live %}
+  <!-- Active courses -->
+  {% if active %}
+    <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+      {% for enrollment in active %}
+        <a href="{{ enrollment.course.get_absolute_url }}"
+           class="group flex flex-col overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200 transition hover:shadow-md hover:ring-emerald-300">
+          {% if enrollment.course.cover %}
+            <img src="{{ enrollment.course.cover.url }}" alt="{{ enrollment.course.title }}" class="aspect-video w-full object-cover">
+          {% else %}
+            <div class="flex aspect-video items-center justify-center bg-gradient-to-br from-slate-700 to-slate-900 px-4 text-center text-sm font-bold text-white/80">
+              {{ enrollment.course.title }}
+            </div>
+          {% endif %}
+          <div class="flex flex-1 flex-col p-4">
+            <h2 class="font-bold text-slate-900 group-hover:text-emerald-700">{{ enrollment.course.title }}</h2>
+            <div class="mt-2 flex items-center justify-between text-xs">
+              <span class="text-slate-500">
+                {% if enrollment.expires_at %}دسترسی تا {{ enrollment.expires_at|jdate }}
+                {% else %}دسترسی دائمی{% endif %}
+              </span>
+              <span class="rounded-full bg-emerald-50 px-2 py-0.5 text-emerald-600 font-medium">فعال</span>
+            </div>
+          </div>
+        </a>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+{% else %}
+  <!-- Empty state -->
+  <div class="rounded-2xl border-2 border-dashed border-slate-200 py-16 text-center">
+    <svg class="mx-auto h-16 w-16 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+    <p class="mt-4 text-lg font-bold text-slate-600">هنوز دوره‌ای ندارید</p>
+    <p class="mt-2 text-sm text-slate-400">همین الان اولین دوره‌تان را شروع کنید.</p>
+    <a href="{% url 'catalog:course_list' %}"
+       class="mt-5 inline-block rounded-xl bg-emerald-500 px-8 py-3 font-bold text-white shadow-lg shadow-emerald-500/20 transition hover:bg-emerald-400">
+      مشاهده دوره‌ها
+    </a>
   </div>
 {% endif %}
 
+<!-- Live classes -->
 {% if live %}
-  <h2 class="mb-4 mt-10 text-lg font-bold">کلاس‌های زنده من</h2>
-  <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+  <h2 class="mb-4 mt-12 text-xl font-bold text-slate-900">کلاس‌های زنده من</h2>
+  <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
     {% for live_class in live %}
-      <a href="{{ live_class.get_absolute_url }}" class="rounded-2xl bg-white p-5 ring-1 ring-slate-200 hover:ring-rose-500">
-        <h3 class="font-bold">{{ live_class.title }}</h3>
+      <a href="{{ live_class.get_absolute_url }}"
+         class="group flex flex-col rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200 transition hover:ring-rose-300">
+        <div class="flex items-start justify-between gap-2">
+          <h3 class="font-bold text-slate-900 group-hover:text-rose-700">{{ live_class.title }}</h3>
+          <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-rose-50 text-rose-500">
+            <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/></svg>
+          </span>
+        </div>
         {% with session=live_class.next_session %}
-          <p class="mt-2 text-sm text-slate-500">{% if session %}جلسه بعدی: {{ session.starts_at|jdate:"%Y/%m/%d — %H:%M" }}{% else %}جلسه آینده‌ای ندارد{% endif %}</p>
+          <p class="mt-3 text-sm text-slate-500">
+            {% if session %}جلسه بعدی: {{ session.starts_at|jdate:"%Y/%m/%d — %H:%M" }}
+            {% else %}جلسه آینده‌ای ندارد{% endif %}
+          </p>
         {% endwith %}
       </a>
     {% endfor %}
   </div>
 {% endif %}
 
+<!-- Expired enrollments -->
 {% if expired %}
-  <h2 class="mb-4 mt-10 text-lg font-bold text-slate-500">دسترسی‌های منقضی‌شده</h2>
-  <ul class="space-y-2 text-sm text-slate-500">
-    {% for enrollment in expired %}
-      <li><a href="{{ enrollment.course.get_absolute_url }}" class="hover:text-emerald-700">{{ enrollment.course.title }}</a> — پایان: {{ enrollment.expires_at|jdate }}</li>
-    {% endfor %}
-  </ul>
+  <div class="mt-12">
+    <h2 class="mb-4 text-lg font-bold text-slate-400">دسترسی‌های منقضی‌شده</h2>
+    <ul class="space-y-2">
+      {% for enrollment in expired %}
+        <li class="flex items-center justify-between rounded-xl bg-white px-4 py-3 text-sm ring-1 ring-slate-100">
+          <a href="{{ enrollment.course.get_absolute_url }}" class="font-medium text-slate-500 hover:text-emerald-600">{{ enrollment.course.title }}</a>
+          <span class="text-slate-400">پایان: {{ enrollment.expires_at|jdate }}</span>
+        </li>
+      {% endfor %}
+    </ul>
+  </div>
 {% endif %}
 {% endblock %}

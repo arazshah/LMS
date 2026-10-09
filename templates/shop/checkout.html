@@ -4,35 +4,84 @@
 {% block title %}خرید {{ product.title }} | {{ site.site_name }}{% endblock %}
 
 {% block content %}
-<div class="mx-auto max-w-lg rounded-2xl bg-white p-8 shadow-sm ring-1 ring-slate-200">
-  <h1 class="text-2xl font-extrabold">تکمیل خرید</h1>
-  <p class="mt-2 text-slate-600">{% if kind == "bundle" %}پکیج{% elif kind == "live" %}کلاس زنده{% else %}دوره{% endif %}: <a href="{{ product.get_absolute_url }}" class="font-bold text-emerald-700">{{ product.title }}</a></p>
+<div class="mx-auto max-w-lg">
+  <h1 class="mb-6 text-2xl font-extrabold text-slate-900">تکمیل خرید</h1>
 
-  {% if error %}<div class="mt-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-800">{{ error }}</div>{% endif %}
+  <!-- Product summary -->
+  <div class="mb-5 flex items-center gap-4 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
+    {% if product.cover %}
+      <img src="{{ product.cover.url }}" alt="{{ product.title }}" class="h-16 w-24 shrink-0 rounded-xl object-cover">
+    {% else %}
+      <div class="flex h-16 w-24 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-600 to-teal-700 text-xs font-bold text-white">
+        {% if kind == "bundle" %}پکیج{% elif kind == "live" %}زنده{% else %}دوره{% endif %}
+      </div>
+    {% endif %}
+    <div>
+      <p class="text-xs text-slate-400">{% if kind == "bundle" %}پکیج آموزشی{% elif kind == "live" %}کلاس زنده{% else %}دوره آموزشی{% endif %}</p>
+      <a href="{{ product.get_absolute_url }}" class="font-bold text-slate-900 hover:text-emerald-700">{{ product.title }}</a>
+    </div>
+  </div>
+
+  {% if error %}
+    <div class="mb-4 flex items-center gap-2 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700 ring-1 ring-red-200">
+      <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      {{ error }}
+    </div>
+  {% endif %}
 
   {% if quote %}
-  <form method="post" class="mt-6 space-y-4">
-    {% csrf_token %}
-    <div class="flex gap-2">
-      <input name="code" value="{{ code }}" placeholder="کد تخفیف" dir="ltr"
-             class="flex-1 rounded-lg border border-slate-300 px-4 py-2 uppercase focus:border-emerald-600 focus:outline-none">
-      <button name="action" value="apply" class="rounded-lg border border-emerald-600 px-4 py-2 text-emerald-700 hover:bg-emerald-50">اعمال</button>
+  <div class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200">
+    <div class="p-5">
+      <form method="post" class="space-y-4">
+        {% csrf_token %}
+
+        <!-- Discount code -->
+        <div>
+          <label class="mb-1.5 block text-sm font-medium text-slate-700">کد تخفیف</label>
+          <div class="flex gap-2">
+            <input name="code" value="{{ code }}" placeholder="مثال: TEST50" dir="ltr"
+                   class="flex-1 rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 uppercase tracking-widest focus:border-emerald-400 focus:bg-white focus:outline-none">
+            <button name="action" value="apply"
+                    class="rounded-xl border border-emerald-500 px-5 py-2.5 text-sm font-medium text-emerald-600 transition hover:bg-emerald-50">
+              اعمال
+            </button>
+          </div>
+        </div>
+
+        <!-- Price breakdown -->
+        <dl class="space-y-2 rounded-xl bg-slate-50 p-4 text-sm">
+          <div class="flex items-center justify-between">
+            <dt class="text-slate-500">قیمت اصلی</dt>
+            <dd class="font-medium">{{ quote.amount|toman }}</dd>
+          </div>
+          {% if quote.discount %}
+            <div class="flex items-center justify-between text-emerald-600">
+              <dt class="flex items-center gap-1.5">
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
+                تخفیف ({{ quote.code.code }})
+              </dt>
+              <dd>-{{ quote.discount|toman }}</dd>
+            </div>
+          {% endif %}
+          <div class="flex items-center justify-between border-t border-slate-200 pt-2.5 text-base font-bold text-slate-900">
+            <dt>مبلغ قابل پرداخت</dt>
+            <dd class="text-emerald-600">{{ quote.total|toman }}</dd>
+          </div>
+        </dl>
+
+        {% if not error %}
+          <button name="action" value="pay"
+                  class="w-full rounded-xl bg-emerald-500 py-3.5 font-bold text-white shadow-lg shadow-emerald-500/20 transition hover:bg-emerald-400">
+            {% if quote.total %}
+              ادامه و پرداخت
+            {% else %}
+              ثبت سفارش رایگان
+            {% endif %}
+          </button>
+        {% endif %}
+      </form>
     </div>
-
-    <dl class="space-y-2 rounded-xl bg-slate-50 p-4 text-sm">
-      <div class="flex justify-between"><dt>قیمت</dt><dd>{{ quote.amount|toman }}</dd></div>
-      {% if quote.discount %}
-        <div class="flex justify-between text-emerald-700"><dt>تخفیف ({{ quote.code.code }})</dt><dd>{{ quote.discount|toman }}</dd></div>
-      {% endif %}
-      <div class="flex justify-between border-t border-slate-200 pt-2 text-base font-bold"><dt>مبلغ قابل پرداخت</dt><dd>{{ quote.total|toman }}</dd></div>
-    </dl>
-
-    {% if not error %}
-      <button name="action" value="pay" class="w-full rounded-lg bg-emerald-600 py-3 font-bold text-white hover:bg-emerald-700">
-        {% if quote.total %}ادامه و پرداخت{% else %}ثبت سفارش رایگان{% endif %}
-      </button>
-    {% endif %}
-  </form>
+  </div>
   {% endif %}
 </div>
 {% endblock %}

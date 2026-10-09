@@ -17,43 +17,99 @@
   <script src="{% static 'dist/htmx.min.js' %}" defer></script>
 </head>
 <body class="flex min-h-screen flex-col bg-slate-50 font-sans text-slate-800 antialiased">
-  <header class="relative border-b border-slate-200 bg-white">
-    <div class="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-4">
-      <a href="{% url 'core:home' %}" class="text-lg font-bold text-emerald-700">{{ site.site_name }}</a>
-      <nav class="hidden items-center gap-x-5 text-sm md:flex">
+
+  <!-- Header -->
+  <header class="sticky top-0 z-40 border-b border-slate-800/50 bg-slate-900 shadow-lg">
+    <div class="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
+      <!-- Logo -->
+      <a href="{% url 'core:home' %}" class="flex items-center gap-2">
+        <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500 text-sm font-black text-white">G</span>
+        <span class="text-base font-bold text-white">{{ site.site_name }}</span>
+      </a>
+
+      <!-- Desktop nav -->
+      <nav class="hidden items-center gap-1 md:flex">
         {% include "_nav_links.html" %}
       </nav>
-      <details class="group md:hidden">
-        <summary class="cursor-pointer list-none rounded-lg border border-slate-300 px-3 py-1 text-sm" aria-label="منو">☰ منو</summary>
-        <nav class="absolute inset-x-0 z-20 mt-3 flex flex-col gap-4 border-b border-slate-200 bg-white px-4 py-4 text-sm shadow-sm">
+
+      <!-- Mobile menu -->
+      <details class="group relative md:hidden">
+        <summary class="flex cursor-pointer list-none items-center gap-1 rounded-lg px-3 py-2 text-sm text-slate-300 hover:bg-slate-800" aria-label="منو">
+          <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+        </summary>
+        <nav class="absolute left-0 right-0 top-full z-50 mt-1 flex flex-col gap-1 rounded-xl border border-slate-700 bg-slate-900 p-2 shadow-xl">
           {% include "_nav_links.html" %}
         </nav>
       </details>
     </div>
   </header>
 
+  <!-- Flash messages -->
+  {% if messages %}
+    <div class="mx-auto mt-4 w-full max-w-6xl px-4">
+      {% for message in messages %}
+        <div class="mb-2 flex items-center gap-3 rounded-xl px-4 py-3 text-sm {% if message.tags == 'error' %}bg-red-50 text-red-800 ring-1 ring-red-200{% else %}bg-emerald-50 text-emerald-800 ring-1 ring-emerald-200{% endif %}">
+          {% if message.tags == 'error' %}
+            <svg class="h-5 w-5 shrink-0 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          {% else %}
+            <svg class="h-5 w-5 shrink-0 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          {% endif %}
+          {{ message }}
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
   <main class="mx-auto w-full max-w-6xl flex-1 px-4 py-8">
-    {% if messages %}
-      <ul class="mb-6 space-y-2">
-        {% for message in messages %}
-          <li class="rounded-lg px-4 py-3 {% if message.tags == 'error' %}bg-red-50 text-red-800{% else %}bg-emerald-50 text-emerald-800{% endif %}">{{ message }}</li>
-        {% endfor %}
-      </ul>
-    {% endif %}
     {% block content %}{% endblock %}
   </main>
 
-  <footer class="border-t border-slate-200 bg-white py-6 text-center text-sm text-slate-500">
-    <p>{{ site.site_name }}</p>
-    {% if site.support_phone or site.support_telegram %}
-      <p class="mt-1">
-        پشتیبانی:
-        {% if site.support_phone %}<span dir="ltr">{{ site.support_phone }}</span>{% endif %}
-        {% if site.support_phone and site.support_telegram %} · {% endif %}
-        {% if site.support_telegram %}<span dir="ltr">{{ site.support_telegram }}</span>{% endif %}
-      </p>
-    {% endif %}
+  <!-- Footer -->
+  <footer class="mt-10 border-t border-slate-200 bg-slate-900 text-slate-400">
+    <div class="mx-auto max-w-6xl px-4 py-10">
+      <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+        <div>
+          <a href="{% url 'core:home' %}" class="flex items-center gap-2">
+            <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500 text-sm font-black text-white">G</span>
+            <span class="text-base font-bold text-white">{{ site.site_name }}</span>
+          </a>
+          {% if site.tagline %}<p class="mt-3 text-sm leading-6">{{ site.tagline }}</p>{% endif %}
+        </div>
+        <div>
+          <h3 class="mb-3 text-sm font-semibold text-white">دسترسی سریع</h3>
+          <ul class="space-y-2 text-sm">
+            <li><a href="{% url 'catalog:course_list' %}" class="hover:text-emerald-400">دوره‌ها</a></li>
+            <li><a href="{% url 'live:list' %}" class="hover:text-emerald-400">کلاس‌های زنده</a></li>
+            <li><a href="{% url 'shop:bundle_list' %}" class="hover:text-emerald-400">پکیج‌ها</a></li>
+            {% if user.is_authenticated %}
+              <li><a href="{% url 'catalog:my_courses' %}" class="hover:text-emerald-400">دوره‌های من</a></li>
+            {% else %}
+              <li><a href="{% url 'accounts:login' %}" class="hover:text-emerald-400">ورود / ثبت‌نام</a></li>
+            {% endif %}
+          </ul>
+        </div>
+        <div>
+          <h3 class="mb-3 text-sm font-semibold text-white">پشتیبانی</h3>
+          {% if site.support_phone %}
+            <p class="flex items-center gap-2 text-sm">
+              <svg class="h-4 w-4 shrink-0 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
+              <span dir="ltr">{{ site.support_phone }}</span>
+            </p>
+          {% endif %}
+          {% if site.support_telegram %}
+            <p class="mt-2 flex items-center gap-2 text-sm">
+              <svg class="h-4 w-4 shrink-0 text-emerald-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12l-6.871 4.326-2.962-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.833.941z"/></svg>
+              <span dir="ltr">{{ site.support_telegram }}</span>
+            </p>
+          {% endif %}
+        </div>
+      </div>
+      <div class="mt-8 border-t border-slate-700 pt-6 text-center text-xs text-slate-500">
+        © {{ site.site_name }} — تمامی حقوق محفوظ است
+      </div>
+    </div>
   </footer>
+
   {% block scripts %}{% endblock %}
 </body>
 </html>

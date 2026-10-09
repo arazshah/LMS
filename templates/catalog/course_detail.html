@@ -2,7 +2,6 @@
 {% load fa %}
 
 {% block title %}{{ course.title }} | {{ site.site_name }}{% endblock %}
-
 {% block description %}{{ course.summary|default:course.title }}{% endblock %}
 {% block og_description %}{{ course.summary|default:course.title }}{% endblock %}
 {% block og_title %}{{ course.title }}{% endblock %}
@@ -10,82 +9,207 @@
 
 {% block content %}
 <div class="grid gap-8 lg:grid-cols-3">
-  <div class="lg:col-span-2">
-    <nav class="mb-3 text-sm text-slate-500">
-      <a href="{% url 'catalog:course_list' %}" class="hover:text-emerald-700">دوره‌ها</a> /
-      <a href="{% url 'catalog:course_list' %}?category={{ course.category.slug|urlencode }}" class="hover:text-emerald-700">{{ course.category }}</a>
-    </nav>
-    <h1 class="text-3xl font-extrabold text-slate-900">{{ course.title }}</h1>
-    {% if course.summary %}<p class="mt-3 text-lg text-slate-600">{{ course.summary }}</p>{% endif %}
 
-    {% if course.description %}
-      <div class="prose mt-6 max-w-none leading-8 text-slate-700">{{ course.description|linebreaks }}</div>
+  <!-- Main content -->
+  <div class="lg:col-span-2">
+
+    <!-- Breadcrumb -->
+    <nav class="mb-4 flex items-center gap-1 text-xs text-slate-400">
+      <a href="{% url 'catalog:course_list' %}" class="hover:text-emerald-600">دوره‌ها</a>
+      <svg class="h-3 w-3 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+      <a href="{% url 'catalog:course_list' %}?category={{ course.category.slug|urlencode }}" class="hover:text-emerald-600">{{ course.category }}</a>
+      <svg class="h-3 w-3 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+      <span class="truncate text-slate-600">{{ course.title }}</span>
+    </nav>
+
+    <!-- Title -->
+    <h1 class="text-3xl font-extrabold leading-tight text-slate-900">{{ course.title }}</h1>
+
+    <!-- Meta badges -->
+    <div class="mt-3 flex flex-wrap items-center gap-2">
+      <span class="inline-flex items-center gap-1 rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600">
+        <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
+        {{ course.category }}
+      </span>
+      <span class="inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-medium
+        {% if course.level == 'beginner' %}bg-emerald-50 text-emerald-700
+        {% elif course.level == 'intermediate' %}bg-sky-50 text-sky-700
+        {% else %}bg-violet-50 text-violet-700{% endif %}">
+        <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+        {{ course.get_level_display }}
+      </span>
+      {% if course.price == 0 %}<span class="rounded-full bg-orange-50 px-3 py-1 text-xs font-medium text-orange-600">رایگان</span>{% endif %}
+    </div>
+
+    {% if course.summary %}
+      <p class="mt-4 text-lg leading-7 text-slate-600">{{ course.summary }}</p>
     {% endif %}
 
-    {% if prerequisites %}
-      <div class="mt-6 rounded-xl bg-amber-50 p-4 text-sm text-amber-900">
-        <p class="font-bold">پیش‌نیازها:</p>
-        <ul class="mt-2 list-inside list-disc">
-          {% for item in prerequisites %}<li><a href="{{ item.get_absolute_url }}" class="underline">{{ item.title }}</a></li>{% endfor %}
-        </ul>
+    <!-- Description -->
+    {% if course.description %}
+      <div class="prose-rtl mt-6 rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-100">
+        {{ course.description|linebreaks }}
       </div>
     {% endif %}
 
-    <h2 class="mb-4 mt-10 text-xl font-bold">سرفصل‌ها</h2>
-    <div class="space-y-4">
-      {% for chapter in chapters %}
-        <section class="overflow-hidden rounded-xl bg-white ring-1 ring-slate-200">
-          <h3 class="bg-slate-50 px-5 py-3 font-bold">{{ chapter.title }}</h3>
-          <ul class="divide-y divide-slate-100">
-            {% for lesson in chapter.lessons.all %}
-              <li class="flex items-center justify-between gap-3 px-5 py-3 text-sm">
-                {% if has_access or lesson.is_free %}
-                  <a href="{{ lesson.get_absolute_url }}" class="text-slate-800 hover:text-emerald-700">{{ lesson.title }}</a>
-                {% else %}
-                  <span class="text-slate-500">🔒 {{ lesson.title }}</span>
-                {% endif %}
-                <span class="flex shrink-0 items-center gap-2 text-xs text-slate-500">
-                  {% if lesson.is_free and not has_access %}<span class="rounded bg-emerald-50 px-2 py-0.5 text-emerald-700">رایگان</span>{% endif %}
-                  <span>{{ lesson.get_kind_display }}</span>
-                  {% if lesson.duration_minutes %}<span>{{ lesson.duration_minutes|fa_num }} دقیقه</span>{% endif %}
-                </span>
+    <!-- Prerequisites -->
+    {% if prerequisites %}
+      <div class="mt-6 flex items-start gap-3 rounded-2xl bg-amber-50 p-5 ring-1 ring-amber-100">
+        <svg class="mt-0.5 h-5 w-5 shrink-0 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        <div>
+          <p class="font-bold text-amber-900">پیش‌نیازها</p>
+          <ul class="mt-2 space-y-1 text-sm">
+            {% for item in prerequisites %}
+              <li>
+                <a href="{{ item.get_absolute_url }}" class="font-medium text-amber-800 underline underline-offset-2 hover:text-amber-900">{{ item.title }}</a>
               </li>
-            {% empty %}
-              <li class="px-5 py-3 text-sm text-slate-500">به‌زودی</li>
             {% endfor %}
           </ul>
-        </section>
-      {% empty %}
-        <p class="text-slate-500">سرفصل‌ها به‌زودی اضافه می‌شوند.</p>
-      {% endfor %}
+        </div>
+      </div>
+    {% endif %}
+
+    <!-- Curriculum -->
+    <div class="mt-10">
+      <h2 class="mb-4 text-xl font-bold text-slate-900">سرفصل‌های دوره</h2>
+      <div class="space-y-3">
+        {% for chapter in chapters %}
+          <details class="group overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200" {% if forloop.first %}open{% endif %}>
+            <summary class="flex cursor-pointer list-none items-center justify-between gap-3 bg-slate-50 px-5 py-4 transition hover:bg-slate-100">
+              <h3 class="font-bold text-slate-800">{{ chapter.title }}</h3>
+              <svg class="h-4 w-4 shrink-0 text-slate-400 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+            </summary>
+            <ul class="divide-y divide-slate-100">
+              {% for lesson in chapter.lessons.all %}
+                <li class="flex items-center justify-between gap-3 px-5 py-3.5 text-sm transition hover:bg-slate-50">
+                  <div class="flex items-center gap-3">
+                    {% if has_access or lesson.is_free %}
+                      <!-- Kind icon -->
+                      <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg
+                        {% if lesson.kind == 'video' %}bg-emerald-50 text-emerald-600
+                        {% elif lesson.kind == 'pdf' %}bg-rose-50 text-rose-600
+                        {% elif lesson.kind == 'notebook' %}bg-orange-50 text-orange-600
+                        {% elif lesson.kind == 'code' %}bg-slate-100 text-slate-600
+                        {% elif lesson.kind == 'geodata' %}bg-sky-50 text-sky-600
+                        {% else %}bg-violet-50 text-violet-600{% endif %}">
+                        {% if lesson.kind == 'video' %}
+                          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        {% elif lesson.kind == 'pdf' %}
+                          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                        {% elif lesson.kind == 'notebook' %}
+                          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                        {% elif lesson.kind == 'code' %}
+                          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
+                        {% elif lesson.kind == 'geodata' %}
+                          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/></svg>
+                        {% else %}
+                          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                        {% endif %}
+                      </span>
+                      <a href="{{ lesson.get_absolute_url }}" class="font-medium text-slate-800 hover:text-emerald-700">{{ lesson.title }}</a>
+                    {% else %}
+                      <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-400">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                      </span>
+                      <span class="text-slate-400">{{ lesson.title }}</span>
+                    {% endif %}
+                  </div>
+                  <div class="flex shrink-0 items-center gap-2 text-xs text-slate-400">
+                    {% if lesson.is_free and not has_access %}
+                      <span class="rounded-full bg-emerald-50 px-2 py-0.5 text-emerald-600">رایگان</span>
+                    {% endif %}
+                    {% if lesson.duration_minutes %}
+                      <span>{{ lesson.duration_minutes|fa_num }} دقیقه</span>
+                    {% endif %}
+                  </div>
+                </li>
+              {% empty %}
+                <li class="px-5 py-4 text-sm text-slate-400">به‌زودی</li>
+              {% endfor %}
+            </ul>
+          </details>
+        {% empty %}
+          <p class="rounded-2xl bg-white p-6 text-center text-slate-400 ring-1 ring-slate-100">سرفصل‌ها به‌زودی اضافه می‌شوند.</p>
+        {% endfor %}
+      </div>
     </div>
+
   </div>
 
-  <aside class="lg:sticky lg:top-6 lg:self-start">
-    <div class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200">
-      {% if course.cover %}<img src="{{ course.cover.url }}" alt="{{ course.title }}" class="aspect-video w-full object-cover">{% endif %}
-      <div class="space-y-3 p-5 text-sm">
-        <div class="flex justify-between"><span class="text-slate-500">سطح</span><span>{{ course.get_level_display }}</span></div>
-        <div class="flex justify-between"><span class="text-slate-500">مدت دسترسی</span><span>{% if course.access_days %}{{ course.access_days|fa_num }} روز{% else %}دائمی{% endif %}</span></div>
-        <div class="flex justify-between text-base font-bold"><span>قیمت</span><span>{{ course.price|toman }}</span></div>
+  <!-- Sidebar -->
+  <aside class="lg:sticky lg:top-24 lg:self-start">
+    <div class="overflow-hidden rounded-2xl bg-white shadow-md ring-1 ring-slate-200">
+      {% if course.cover %}
+        <div class="relative overflow-hidden">
+          <img src="{{ course.cover.url }}" alt="{{ course.title }}" class="aspect-video w-full object-cover">
+          <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
+        </div>
+      {% endif %}
 
-        {% if has_access %}
-          <div class="rounded-lg bg-emerald-50 p-3 text-emerald-800">
-            {% if course.is_free %}این دوره رایگان است.
-            {% elif enrollment %}شما به این دوره دسترسی دارید{% if enrollment.expires_at %} تا {{ enrollment.expires_at|jdate }}{% endif %}.
-            {% else %}شما به این دوره دسترسی دارید.{% endif %}
-          </div>
-          {% if enrollment.expires_at and not user.is_staff %}
-            <a href="{% url 'shop:checkout' 'course' course.slug %}" class="block rounded-lg border border-emerald-600 py-2 text-center text-emerald-700 hover:bg-emerald-50">تمدید دسترسی</a>
+      <div class="p-5">
+        <!-- Price -->
+        <div class="flex items-center justify-between">
+          <p class="text-2xl font-extrabold text-slate-900">{{ course.price|toman }}</p>
+          {% if course.price > 0 %}
+            <span class="rounded-full bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700">خرید دوره</span>
           {% endif %}
-        {% else %}
-          <a href="{% url 'shop:checkout' 'course' course.slug %}" class="block rounded-lg bg-emerald-600 py-3 text-center font-bold text-white hover:bg-emerald-700">خرید دوره</a>
-        {% endif %}
+        </div>
+
+        <!-- Specs -->
+        <dl class="mt-4 space-y-2 text-sm">
+          <div class="flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2">
+            <dt class="text-slate-500">سطح</dt>
+            <dd class="font-medium text-slate-800">{{ course.get_level_display }}</dd>
+          </div>
+          <div class="flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2">
+            <dt class="text-slate-500">مدت دسترسی</dt>
+            <dd class="font-medium text-slate-800">{% if course.access_days %}{{ course.access_days|fa_num }} روز{% else %}دائمی{% endif %}</dd>
+          </div>
+          <div class="flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2">
+            <dt class="text-slate-500">دسته</dt>
+            <dd class="font-medium text-slate-800">{{ course.category }}</dd>
+          </div>
+        </dl>
+
+        <!-- CTA -->
+        <div class="mt-5">
+          {% if has_access %}
+            <div class="rounded-xl bg-emerald-50 p-3 text-sm text-emerald-800 ring-1 ring-emerald-100">
+              <div class="flex items-center gap-2">
+                <svg class="h-5 w-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <span class="font-semibold">شما دسترسی دارید</span>
+              </div>
+              {% if enrollment.expires_at %}
+                <p class="mt-1 text-xs text-emerald-700">تا {{ enrollment.expires_at|jdate }}</p>
+              {% elif course.is_free %}
+                <p class="mt-1 text-xs text-emerald-700">دوره رایگان</p>
+              {% endif %}
+            </div>
+            {% if enrollment.expires_at and not user.is_staff %}
+              <a href="{% url 'shop:checkout' 'course' course.slug %}"
+                 class="mt-3 block rounded-xl border border-emerald-400 py-2.5 text-center text-sm font-semibold text-emerald-700 transition hover:bg-emerald-50">
+                تمدید دسترسی
+              </a>
+            {% endif %}
+          {% else %}
+            <a href="{% url 'shop:checkout' 'course' course.slug %}"
+               class="block rounded-xl bg-emerald-500 py-3.5 text-center font-bold text-white shadow-lg shadow-emerald-500/20 transition hover:bg-emerald-400">
+              {% if course.price == 0 %}مشاهده رایگان{% else %}خرید دوره{% endif %}
+            </a>
+          {% endif %}
+        </div>
+
+        <!-- Bundle links -->
         {% for bundle in bundles %}
-          <a href="{{ bundle.get_absolute_url }}" class="block rounded-lg bg-sky-50 p-3 text-sky-800 hover:bg-sky-100">این دوره در پکیج «{{ bundle.title }}» هم هست — {{ bundle.price|toman }}</a>
+          <a href="{{ bundle.get_absolute_url }}"
+             class="mt-3 flex items-center gap-2 rounded-xl bg-sky-50 p-3 text-sm text-sky-800 ring-1 ring-sky-100 transition hover:bg-sky-100">
+            <svg class="h-4 w-4 shrink-0 text-sky-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+            <span>این دوره در پکیج «{{ bundle.title }}» — {{ bundle.price|toman }}</span>
+          </a>
         {% endfor %}
       </div>
     </div>
   </aside>
+
 </div>
 {% endblock %}

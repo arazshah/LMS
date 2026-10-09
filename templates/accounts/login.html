@@ -3,17 +3,50 @@
 {% block title %}ورود | {{ site.site_name }}{% endblock %}
 
 {% block content %}
-<div class="mx-auto max-w-md rounded-2xl bg-white p-8 shadow-sm ring-1 ring-slate-200">
-  <h1 class="text-2xl font-extrabold">ورود / ثبت‌نام</h1>
-  <p class="mt-2 text-sm text-slate-600">شماره موبایل خود را وارد کنید تا کد تأیید برایتان پیامک شود.</p>
-  <form method="post" class="mt-6 space-y-4">
-    {% csrf_token %}
-    <input type="hidden" name="next" value="{{ next }}">
-    {% include "accounts/_errors.html" %}
-    <label class="block text-sm font-medium" for="{{ form.phone.id_for_label }}">{{ form.phone.label }}</label>
-    {{ form.phone }}
-    {% for error in form.phone.errors %}<p class="text-sm text-red-600">{{ error }}</p>{% endfor %}
-    <button class="w-full rounded-lg bg-emerald-600 py-3 font-bold text-white hover:bg-emerald-700">دریافت کد</button>
-  </form>
+<div class="flex min-h-[60vh] items-center justify-center">
+  <div class="w-full max-w-md">
+    <!-- Card -->
+    <div class="overflow-hidden rounded-3xl bg-white shadow-xl ring-1 ring-slate-200">
+      <!-- Top gradient strip -->
+      <div class="bg-gradient-to-r from-emerald-500 to-teal-500 p-6 text-white">
+        <div class="flex items-center gap-3">
+          <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-white/20 text-lg font-black">G</span>
+          <div>
+            <p class="font-bold">{{ site.site_name }}</p>
+            <p class="text-xs text-emerald-100">ورود / ثبت‌نام</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="p-6">
+        <h1 class="text-xl font-extrabold text-slate-900">ورود با شماره موبایل</h1>
+        <p class="mt-1.5 text-sm text-slate-500">کد تأیید به شماره شما پیامک می‌شود.</p>
+
+        <form method="post" class="mt-6 space-y-4">
+          {% csrf_token %}
+          <input type="hidden" name="next" value="{{ next }}">
+          {% include "accounts/_errors.html" %}
+
+          <div>
+            <label class="mb-1.5 block text-sm font-medium text-slate-700" for="{{ form.phone.id_for_label }}">
+              {{ form.phone.label }}
+            </label>
+            {{ form.phone }}
+            {% for error in form.phone.errors %}
+              <p class="mt-1 text-sm text-red-500">{{ error }}</p>
+            {% endfor %}
+          </div>
+
+          <button class="w-full rounded-xl bg-emerald-500 py-3 font-bold text-white shadow-lg shadow-emerald-500/20 transition hover:bg-emerald-400">
+            دریافت کد تأیید
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <p class="mt-5 text-center text-xs text-slate-400">
+      با ورود، <a href="#" class="text-emerald-600 hover:underline">شرایط استفاده</a> را می‌پذیرید.
+    </p>
+  </div>
 </div>
 {% endblock %}

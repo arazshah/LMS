@@ -1,16 +1,33 @@
 {% load fa %}
-<a href="{{ live_class.get_absolute_url }}" class="group flex flex-col overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200 transition hover:shadow-md">
+<a href="{{ live_class.get_absolute_url }}"
+   class="group flex flex-col overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200 transition hover:-translate-y-0.5 hover:shadow-lg hover:ring-rose-300">
   {% if live_class.cover %}
-    <img src="{{ live_class.cover.url }}" alt="{{ live_class.title }}" class="aspect-video w-full object-cover">
+    <img src="{{ live_class.cover.url }}" alt="{{ live_class.title }}" class="aspect-video w-full object-cover transition group-hover:scale-[1.02]">
   {% else %}
-    <div class="flex aspect-video w-full items-center justify-center bg-gradient-to-br from-rose-600 to-orange-700 p-4 text-center text-lg font-bold text-white">{{ live_class.title }}</div>
+    <div class="relative flex aspect-video w-full items-center justify-center overflow-hidden bg-gradient-to-br from-rose-600 to-orange-700 p-4 text-center">
+      <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,_rgba(251,113,133,0.3),transparent)]"></div>
+      <p class="relative text-lg font-bold text-white/90">{{ live_class.title }}</p>
+    </div>
   {% endif %}
   <div class="flex flex-1 flex-col p-5">
-    <span class="mb-2 w-fit rounded-full bg-rose-50 px-2 py-1 text-xs text-rose-700">● کلاس زنده</span>
-    <h3 class="font-bold text-slate-900 group-hover:text-emerald-700">{{ live_class.title }}</h3>
+    <span class="mb-2 flex w-fit items-center gap-1.5 rounded-full bg-rose-50 px-2.5 py-1 text-xs font-medium text-rose-700 ring-1 ring-rose-200">
+      <svg class="h-2.5 w-2.5 animate-pulse fill-current" viewBox="0 0 8 8"><circle cx="4" cy="4" r="4"/></svg>
+      کلاس زنده
+    </span>
+    <h3 class="font-bold text-slate-900 transition group-hover:text-rose-700">{{ live_class.title }}</h3>
     {% with session=live_class.next_session %}
-      <p class="mt-2 text-sm text-slate-600">{% if session %}جلسه بعدی: {{ session.starts_at|jdate:"%Y/%m/%d — %H:%M" }}{% else %}زمان‌بندی به‌زودی{% endif %}</p>
+      <p class="mt-2 text-sm text-slate-500">
+        {% if session %}
+          <span class="font-medium text-slate-700">جلسه بعدی:</span>
+          {{ session.starts_at|jdate:"%Y/%m/%d — %H:%M" }}
+        {% else %}
+          زمان‌بندی به‌زودی اعلام می‌شود
+        {% endif %}
+      </p>
     {% endwith %}
-    <p class="mt-auto pt-4 text-sm font-bold text-slate-900">{{ live_class.price|toman }}</p>
+    <div class="mt-auto flex items-center justify-between pt-4">
+      <p class="font-bold text-slate-900">{{ live_class.price|toman }}</p>
+      <span class="text-xs text-slate-400">جزئیات ←</span>
+    </div>
   </div>
 </a>

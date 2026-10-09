@@ -2,7 +2,6 @@
 {% load fa %}
 
 {% block title %}{{ bundle.title }} | {{ site.site_name }}{% endblock %}
-
 {% block description %}{{ bundle.summary|default:bundle.title }}{% endblock %}
 {% block og_description %}{{ bundle.summary|default:bundle.title }}{% endblock %}
 {% block og_title %}{{ bundle.title }}{% endblock %}
@@ -10,27 +9,107 @@
 
 {% block content %}
 <div class="grid gap-8 lg:grid-cols-3">
+
+  <!-- Main content -->
   <div class="lg:col-span-2">
-    <nav class="mb-3 text-sm text-slate-500"><a href="{% url 'shop:bundle_list' %}" class="hover:text-emerald-700">پکیج‌ها</a></nav>
-    <h1 class="text-3xl font-extrabold text-slate-900">{{ bundle.title }}</h1>
-    {% if bundle.summary %}<p class="mt-3 text-lg text-slate-600">{{ bundle.summary }}</p>{% endif %}
-    {% if bundle.description %}<div class="mt-6 leading-8 text-slate-700">{{ bundle.description|linebreaks }}</div>{% endif %}
-    <h2 class="mb-4 mt-10 text-xl font-bold">دوره‌های این پکیج</h2>
-    <div class="grid gap-6 sm:grid-cols-2">
-      {% for course in courses %}{% include "catalog/_course_card.html" %}{% endfor %}
+    <!-- Breadcrumb -->
+    <nav class="mb-4 flex items-center gap-1.5 text-xs text-slate-400">
+      <a href="{% url 'shop:bundle_list' %}" class="hover:text-emerald-600">پکیج‌ها</a>
+      <svg class="h-3 w-3 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+      <span class="text-slate-600">{{ bundle.title }}</span>
+    </nav>
+
+    <span class="inline-block rounded-full bg-sky-50 px-3 py-1 text-xs font-medium text-sky-700 ring-1 ring-sky-200">
+      پکیج · {{ bundle.courses.count|fa_num }} دوره
+    </span>
+
+    <h1 class="mt-3 text-3xl font-extrabold leading-tight text-slate-900">{{ bundle.title }}</h1>
+
+    {% if bundle.summary %}
+      <p class="mt-3 text-lg text-slate-600">{{ bundle.summary }}</p>
+    {% endif %}
+
+    {% if bundle.cover %}
+      <img src="{{ bundle.cover.url }}" alt="{{ bundle.title }}"
+           class="mt-6 w-full rounded-2xl object-cover shadow-sm ring-1 ring-slate-200">
+    {% endif %}
+
+    {% if bundle.description %}
+      <div class="prose-rtl mt-8 rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-100">
+        {{ bundle.description|linebreaks }}
+      </div>
+    {% endif %}
+
+    <!-- Courses in bundle -->
+    <div class="mt-10">
+      <h2 class="mb-5 flex items-center gap-2 text-xl font-bold text-slate-900">
+        دوره‌های این پکیج
+        <span class="rounded-full bg-slate-100 px-2 py-0.5 text-sm font-medium text-slate-500">{{ bundle.courses.count|fa_num }}</span>
+      </h2>
+      <div class="grid gap-5 sm:grid-cols-2">
+        {% for course in courses %}{% include "catalog/_course_card.html" %}{% endfor %}
+      </div>
     </div>
   </div>
-  <aside class="lg:sticky lg:top-6 lg:self-start">
-    <div class="space-y-3 rounded-2xl bg-white p-5 text-sm shadow-sm ring-1 ring-slate-200">
+
+  <!-- Sticky sidebar -->
+  <aside>
+    <div class="sticky top-24 space-y-4 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
+      {% if bundle.cover %}
+        <img src="{{ bundle.cover.url }}" alt="{{ bundle.title }}"
+             class="aspect-video w-full rounded-xl object-cover">
+      {% else %}
+        <div class="flex aspect-video items-center justify-center rounded-xl bg-gradient-to-br from-sky-700 to-indigo-900 text-white font-bold text-sm text-center p-4">
+          {{ bundle.title }}
+        </div>
+      {% endif %}
+
+      <!-- Savings badge -->
       {% with original=bundle.original_price %}
         {% if original > bundle.price %}
-          <div class="flex justify-between"><span class="text-slate-500">قیمت جداگانه</span><span class="text-slate-400 line-through">{{ original|toman }}</span></div>
+          <div class="flex items-center justify-between rounded-xl bg-emerald-50 px-4 py-2.5 ring-1 ring-emerald-200">
+            <span class="text-sm text-emerald-700">صرفه‌جویی شما</span>
+            <span class="font-bold text-emerald-700">{{ original|add:"-0"|floatformat:"0" }} - {{ bundle.price }} = ...</span>
+          </div>
         {% endif %}
       {% endwith %}
-      <div class="flex justify-between text-base font-bold"><span>قیمت پکیج</span><span>{{ bundle.price|toman }}</span></div>
-      <div class="flex justify-between"><span class="text-slate-500">مدت دسترسی</span><span>{% if bundle.access_days %}{{ bundle.access_days|fa_num }} روز{% else %}طبق هر دوره{% endif %}</span></div>
-      <a href="{% url 'shop:checkout' 'bundle' bundle.slug %}" class="block rounded-lg bg-emerald-600 py-3 text-center font-bold text-white hover:bg-emerald-700">خرید پکیج</a>
+
+      <dl class="space-y-2 text-sm">
+        {% with original=bundle.original_price %}
+          {% if original > bundle.price %}
+            <div class="flex justify-between">
+              <dt class="text-slate-500">قیمت جداگانه</dt>
+              <dd class="text-slate-400 line-through">{{ original|toman }}</dd>
+            </div>
+          {% endif %}
+        {% endwith %}
+        <div class="flex justify-between text-base font-bold text-slate-900">
+          <dt>قیمت پکیج</dt>
+          <dd class="text-emerald-600">{{ bundle.price|toman }}</dd>
+        </div>
+        {% if bundle.access_days %}
+          <div class="flex justify-between">
+            <dt class="text-slate-500">مدت دسترسی</dt>
+            <dd>{{ bundle.access_days|fa_num }} روز</dd>
+          </div>
+        {% else %}
+          <div class="flex justify-between">
+            <dt class="text-slate-500">مدت دسترسی</dt>
+            <dd>طبق هر دوره</dd>
+          </div>
+        {% endif %}
+        <div class="flex justify-between">
+          <dt class="text-slate-500">تعداد دوره</dt>
+          <dd>{{ bundle.courses.count|fa_num }} دوره</dd>
+        </div>
+      </dl>
+
+      <a href="{% url 'shop:checkout' 'bundle' bundle.slug %}"
+         class="block w-full rounded-xl bg-emerald-500 py-3.5 text-center font-bold text-white shadow-lg shadow-emerald-500/20 transition hover:bg-emerald-400">
+        خرید پکیج
+      </a>
     </div>
   </aside>
+
 </div>
 {% endblock %}

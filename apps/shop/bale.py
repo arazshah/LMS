@@ -107,7 +107,27 @@ def _handle_text(message: dict) -> None:
         return
     order.bale_chat_id = str(chat_id)
     order.save(update_fields=["bale_chat_id", "updated_at"])
-    send_invoice(chat_id, order)
+    try:
+        send_invoice(chat_id, order)
+    except BaleError as exc:
+        logger.warning("send_invoice failed for order %s: %s", order.number, exc)
+        config = SiteSettings.load()
+        if config.card_number:
+            send_message(
+                chat_id,
+                f"سفارش {order.number} — {order.title}\n"
+                f"مبلغ: {order.total:,} تومان\n\n"
+                f"لطفاً مبلغ را به کارت زیر واریز کنید و تصویر رسید را در سایت آپلود کنید:\n"
+                f"{config.card_number}"
+                + (f"\nبه نام {config.card_holder}" if config.card_holder else "")
+                + f"\n\nبرگشت به سایت: برای ارسال رسید، صفحه سفارش را در سایت باز کنید.",
+            )
+        else:
+            send_message(
+                chat_id,
+                f"سفارش {order.number} دریافت شد.\n"
+                "برای تکمیل پرداخت، به سایت برگردید و از روش کارت‌به‌کارت استفاده کنید.",
+            )
 
 
 def _handle_pre_checkout(query: dict) -> None:

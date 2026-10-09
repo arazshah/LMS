@@ -4,106 +4,203 @@
 {% block title %}{{ lesson.title }} | {{ course.title }}{% endblock %}
 
 {% block content %}
-<div class="grid gap-8 lg:grid-cols-4">
-  <article class="lg:col-span-3">
-    <nav class="mb-3 text-sm text-slate-500">
-      <a href="{{ course.get_absolute_url }}" class="hover:text-emerald-700">{{ course.title }}</a> / {{ lesson.chapter.title }}
-    </nav>
-    <h1 class="text-2xl font-extrabold text-slate-900">{{ lesson.title }}</h1>
-    <p class="mt-2 text-sm text-slate-500">{{ lesson.get_kind_display }}{% if lesson.duration_minutes %} · {{ lesson.duration_minutes|fa_num }} دقیقه{% endif %}</p>
+<div class="grid gap-6 lg:grid-cols-4">
 
-    {% if can_view %}
-      {% if video and video.is_ready %}
-        <div class="mt-6" data-hls-player data-src="{% url 'videos:hls' lesson.pk 'master.m3u8' %}">
-          <div data-stage class="relative aspect-video w-full select-none overflow-hidden rounded-2xl bg-black">
-            <video class="h-full w-full" controls playsinline preload="metadata"
-                   controlslist="nodownload nofullscreen noremoteplayback" disablepictureinpicture></video>
-            <div data-watermark dir="ltr"
-                 class="pointer-events-none absolute z-10 rounded bg-black/20 px-2 py-1 text-xs text-white/60 transition-all duration-1000 sm:text-sm">
-              {{ request.get_host }}{% if user.is_authenticated %} · {{ user.phone }}{% endif %}
-            </div>
-          </div>
-          <div class="mt-2 flex items-center justify-end gap-3 text-sm">
-            <select data-quality hidden class="rounded border border-slate-300 bg-white px-2 py-1" aria-label="کیفیت">
-              <option value="-1">کیفیت خودکار</option>
-            </select>
-            <button type="button" data-fullscreen class="rounded border border-slate-300 bg-white px-3 py-1 hover:border-emerald-600">تمام‌صفحه</button>
-          </div>
-        </div>
-      {% elif video %}
-        <div class="mt-6 flex aspect-video items-center justify-center rounded-2xl bg-slate-900 text-slate-300">ویدیوی این جلسه در حال آماده‌سازی است.</div>
-      {% endif %}
-
-      {% if lesson.body %}
-        <div class="mt-6 rounded-2xl bg-white p-6 leading-8 ring-1 ring-slate-200">{{ lesson.body|linebreaks }}</div>
-      {% endif %}
-
-      {% with files=lesson.files.all %}
-        {% if files %}
-          <section class="mt-6 rounded-2xl bg-white p-6 ring-1 ring-slate-200">
-            <h2 class="mb-3 font-bold">فایل‌ها</h2>
-            <ul class="space-y-2">
-              {% for item in files %}
-                <li><a href="{{ item.get_absolute_url }}" class="text-emerald-700 hover:underline">⬇ {{ item.title }}</a> <span class="text-xs text-slate-400" dir="ltr">{{ item.filename }}</span></li>
-              {% endfor %}
-            </ul>
-          </section>
-        {% endif %}
-      {% endwith %}
-    {% else %}
-      <div class="mt-6 rounded-2xl bg-white p-8 text-center ring-1 ring-slate-200">
-        <p class="text-lg font-bold">🔒 این جلسه فقط برای دانشجویان این دوره قابل مشاهده است.</p>
-        <a href="{{ course.get_absolute_url }}" class="mt-4 inline-block rounded-lg bg-emerald-600 px-6 py-3 font-bold text-white hover:bg-emerald-700">مشاهده دوره و خرید</a>
+  <!-- Sidebar: lesson list -->
+  <aside class="order-last lg:order-first">
+    <div class="sidebar-nav sticky top-24 rounded-2xl bg-white p-3 shadow-sm ring-1 ring-slate-200">
+      <div class="mb-3 flex items-center justify-between px-2">
+        <a href="{{ course.get_absolute_url }}" class="flex items-center gap-2 text-xs font-semibold text-slate-500 hover:text-emerald-600">
+          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+          بازگشت به دوره
+        </a>
       </div>
-    {% endif %}
-
-    {% if can_ask %}
-      <section id="questions" class="mt-10">
-        <h2 class="mb-4 text-xl font-bold">پرسش و پاسخ</h2>
-        <form method="post" action="{% url 'qa:ask' lesson.pk %}" class="space-y-3 rounded-2xl bg-white p-5 ring-1 ring-slate-200">
-          {% csrf_token %}
-          {{ question_form.body }}
-          <button class="rounded-lg bg-emerald-600 px-5 py-2 font-bold text-white hover:bg-emerald-700">ارسال سوال</button>
-        </form>
-        <ul class="mt-4 space-y-4">
-          {% for question in questions %}
-            <li class="rounded-2xl bg-white p-5 ring-1 ring-slate-200">
-              <p class="text-xs text-slate-500">{{ question.user.first_name|default:"دانشجو" }} · {{ question.created_at|jdate }}</p>
-              <p class="mt-2 whitespace-pre-line leading-7">{{ question.body }}</p>
-              {% if question.is_answered %}
-                <div class="mt-4 rounded-xl bg-emerald-50 p-4">
-                  <p class="text-xs font-bold text-emerald-800">پاسخ مدرس · {{ question.answered_at|jdate }}</p>
-                  <p class="mt-2 whitespace-pre-line leading-7 text-slate-800">{{ question.answer }}</p>
-                </div>
-              {% else %}
-                <p class="mt-3 text-xs text-amber-700">در انتظار پاسخ</p>
-              {% endif %}
-            </li>
-          {% empty %}
-            <li class="text-sm text-slate-500">هنوز سوالی برای این جلسه ثبت نشده است.</li>
-          {% endfor %}
-        </ul>
-      </section>
-    {% endif %}
-
-    <div class="mt-8 flex justify-between text-sm">
-      {% if prev_lesson %}<a href="{{ prev_lesson.get_absolute_url }}" class="text-emerald-700 hover:underline">→ {{ prev_lesson.title }}</a>{% else %}<span></span>{% endif %}
-      {% if next_lesson %}<a href="{{ next_lesson.get_absolute_url }}" class="text-emerald-700 hover:underline">{{ next_lesson.title }} ←</a>{% endif %}
-    </div>
-  </article>
-
-  <aside class="order-first lg:order-none">
-    <div class="rounded-2xl bg-white p-4 text-sm ring-1 ring-slate-200">
       {% for chapter in chapters %}
-        <p class="mb-2 mt-3 font-bold first:mt-0">{{ chapter.title }}</p>
-        <ul class="space-y-1">
+        <p class="mb-1 mt-3 px-2 text-xs font-bold text-slate-400 first:mt-0">{{ chapter.title }}</p>
+        <ul class="space-y-0.5">
           {% for item in chapter.lessons.all %}
-            <li><a href="{{ item.get_absolute_url }}" class="block rounded px-2 py-1 {% if item.pk == lesson.pk %}bg-emerald-50 font-bold text-emerald-800{% else %}text-slate-600 hover:bg-slate-50{% endif %}">{{ item.title }}</a></li>
+            <li>
+              <a href="{{ item.get_absolute_url }}"
+                 class="flex items-center gap-2 rounded-lg px-2 py-2 text-sm transition
+                        {% if item.pk == lesson.pk %}bg-emerald-50 font-semibold text-emerald-800{% else %}text-slate-600 hover:bg-slate-50 hover:text-slate-900{% endif %}">
+                {% if item.pk == lesson.pk %}
+                  <span class="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500"></span>
+                {% else %}
+                  <span class="h-1.5 w-1.5 shrink-0 rounded-full bg-slate-300"></span>
+                {% endif %}
+                <span class="truncate">{{ item.title }}</span>
+              </a>
+            </li>
           {% endfor %}
         </ul>
       {% endfor %}
     </div>
   </aside>
+
+  <!-- Main article -->
+  <article class="lg:col-span-3">
+
+    <!-- Breadcrumb -->
+    <nav class="mb-4 flex items-center gap-1 text-xs text-slate-400">
+      <a href="{{ course.get_absolute_url }}" class="hover:text-emerald-600">{{ course.title }}</a>
+      <svg class="h-3 w-3 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+      <span class="text-slate-600">{{ lesson.chapter.title }}</span>
+    </nav>
+
+    <h1 class="text-2xl font-extrabold leading-tight text-slate-900">{{ lesson.title }}</h1>
+    <p class="mt-1.5 text-sm text-slate-400">
+      {{ lesson.get_kind_display }}{% if lesson.duration_minutes %} · {{ lesson.duration_minutes|fa_num }} دقیقه{% endif %}
+    </p>
+
+    {% if can_view %}
+      <!-- Video player -->
+      {% if video and video.is_ready %}
+        <div class="mt-5" data-hls-player data-src="{% url 'videos:hls' lesson.pk 'master.m3u8' %}">
+          <div data-stage class="relative aspect-video w-full select-none overflow-hidden rounded-2xl bg-black shadow-xl">
+            <video class="h-full w-full" controls playsinline preload="metadata"
+                   controlslist="nodownload nofullscreen noremoteplayback" disablepictureinpicture></video>
+            <div data-watermark dir="ltr"
+                 class="pointer-events-none absolute z-10 rounded-lg bg-black/30 px-2 py-1 text-xs text-white/50 backdrop-blur-sm transition-all duration-1000 sm:text-sm">
+              {{ request.get_host }}{% if user.is_authenticated %} · {{ user.phone }}{% endif %}
+            </div>
+          </div>
+          <div class="mt-2 flex items-center justify-end gap-3 text-sm">
+            <select data-quality hidden class="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm" aria-label="کیفیت">
+              <option value="-1">کیفیت خودکار</option>
+            </select>
+            <button type="button" data-fullscreen class="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm hover:border-emerald-400 hover:text-emerald-700">تمام‌صفحه</button>
+          </div>
+        </div>
+      {% elif video %}
+        <div class="mt-5 flex aspect-video items-center justify-center rounded-2xl bg-slate-800 text-slate-300">
+          <div class="text-center">
+            <svg class="mx-auto h-12 w-12 animate-pulse opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 10l4.553-2.069A1 1 0 0121 8.867V15.1a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+            <p class="mt-3 text-sm">ویدیوی این جلسه در حال آماده‌سازی است...</p>
+          </div>
+        </div>
+      {% endif %}
+
+      <!-- Text body -->
+      {% if lesson.body %}
+        <div class="prose-rtl mt-6 rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-100">
+          {{ lesson.body|linebreaks }}
+        </div>
+      {% endif %}
+
+      <!-- Files -->
+      {% with files=lesson.files.all %}
+        {% if files %}
+          <section class="mt-5 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-100">
+            <h2 class="mb-3 font-bold text-slate-900">فایل‌های جلسه</h2>
+            <ul class="space-y-2">
+              {% for item in files %}
+                <li>
+                  <a href="{{ item.get_absolute_url }}"
+                     class="flex items-center gap-3 rounded-xl border border-slate-200 px-4 py-3 text-sm transition hover:border-emerald-400 hover:bg-emerald-50">
+                    <svg class="h-5 w-5 shrink-0 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                    <span class="font-medium text-slate-800">{{ item.title }}</span>
+                    <span class="mr-auto text-xs text-slate-400" dir="ltr">{{ item.filename }}</span>
+                  </a>
+                </li>
+              {% endfor %}
+            </ul>
+          </section>
+        {% endif %}
+      {% endwith %}
+
+    {% else %}
+      <!-- Access denied -->
+      <div class="mt-6 rounded-2xl bg-slate-900 p-10 text-center text-white shadow-xl">
+        <svg class="mx-auto h-16 w-16 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+        <p class="mt-4 text-lg font-bold">این جلسه فقط برای دانشجویان دوره است</p>
+        <p class="mt-2 text-sm text-slate-400">برای مشاهده این محتوا دوره را تهیه کنید.</p>
+        <a href="{{ course.get_absolute_url }}"
+           class="mt-6 inline-block rounded-xl bg-emerald-500 px-8 py-3 font-bold text-white shadow-lg shadow-emerald-500/25 transition hover:bg-emerald-400">
+          مشاهده دوره و خرید
+        </a>
+      </div>
+    {% endif %}
+
+    <!-- Q&A -->
+    {% if can_ask %}
+      <section id="questions" class="mt-12">
+        <div class="mb-5 flex items-center gap-3">
+          <h2 class="text-xl font-bold text-slate-900">پرسش و پاسخ</h2>
+          {% if questions %}
+            <span class="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600">{{ questions|length }}</span>
+          {% endif %}
+        </div>
+
+        <!-- Ask form -->
+        <form method="post" action="{% url 'qa:ask' lesson.pk %}"
+              class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-100">
+          {% csrf_token %}
+          <label class="mb-2 block text-sm font-semibold text-slate-700">سوال شما</label>
+          {{ question_form.body }}
+          <button class="mt-3 rounded-xl bg-emerald-500 px-6 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-emerald-400">
+            ارسال سوال
+          </button>
+        </form>
+
+        <!-- Questions list -->
+        <ul class="mt-5 space-y-4">
+          {% for question in questions %}
+            <li class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-100">
+              <div class="flex items-center justify-between gap-3">
+                <div class="flex items-center gap-2">
+                  <span class="flex h-8 w-8 items-center justify-center rounded-full bg-slate-200 text-sm font-bold text-slate-700">
+                    {{ question.user.first_name|first|default:"د" }}
+                  </span>
+                  <span class="text-sm font-semibold text-slate-700">{{ question.user.first_name|default:"دانشجو" }}</span>
+                </div>
+                <span class="text-xs text-slate-400">{{ question.created_at|jdate }}</span>
+              </div>
+              <p class="mt-3 leading-7 text-slate-800">{{ question.body }}</p>
+
+              {% if question.is_answered %}
+                <div class="mt-4 rounded-xl bg-emerald-50 p-4 ring-1 ring-emerald-100">
+                  <div class="mb-2 flex items-center gap-2 text-xs font-semibold text-emerald-700">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    پاسخ مدرس · {{ question.answered_at|jdate }}
+                  </div>
+                  <p class="leading-7 text-slate-800">{{ question.answer }}</p>
+                </div>
+              {% else %}
+                <p class="mt-3 flex items-center gap-1.5 text-xs text-amber-600">
+                  <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                  در انتظار پاسخ
+                </p>
+              {% endif %}
+            </li>
+          {% empty %}
+            <li class="rounded-2xl border-2 border-dashed border-slate-200 py-8 text-center text-sm text-slate-400">
+              هنوز سوالی ثبت نشده. اولین نفر باشید!
+            </li>
+          {% endfor %}
+        </ul>
+      </section>
+    {% endif %}
+
+    <!-- Prev/Next navigation -->
+    <div class="mt-8 flex items-center justify-between gap-4">
+      {% if prev_lesson %}
+        <a href="{{ prev_lesson.get_absolute_url }}"
+           class="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:border-emerald-400 hover:text-emerald-700">
+          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+          {{ prev_lesson.title }}
+        </a>
+      {% else %}<span></span>{% endif %}
+
+      {% if next_lesson %}
+        <a href="{{ next_lesson.get_absolute_url }}"
+           class="flex items-center gap-2 rounded-xl bg-emerald-500 px-4 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-emerald-400">
+          {{ next_lesson.title }}
+          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+        </a>
+      {% endif %}
+    </div>
+
+  </article>
 </div>
 {% endblock %}
 
