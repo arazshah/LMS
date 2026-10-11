@@ -1,0 +1,56 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_urls %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+  <a href="{% url 'admin:index' %}">خانه</a> &rsaquo;
+  <a href="{% url 'admin:catalog_course_changelist' %}">دوره‌ها</a> &rsaquo; ایمپورت از اکسل
+</div>
+{% endblock %}
+
+{% block content %}
+<div id="content-main" style="max-width:860px">
+  <p>
+    دسته‌ها، دوره‌ها (با قیمت، پیش‌نیاز، تصویر)، فصل‌ها، جلسه‌ها و پکیج‌ها را با یک فایل اکسل وارد کنید.
+    ایمپورت دوباره همان فایل، موارد موجود را <b>به‌روزرسانی</b> می‌کند و چیزی تکراری نمی‌سازد.
+    ویدیو و فایل‌های هر جلسه را بعداً از صفحه همان جلسه آپلود کنید؛ نام فایل‌های لازم در
+    «یادداشت داخلی» هر جلسه ثبت می‌شود.
+  </p>
+  <p><a href="{% url 'admin:catalog_course_template' %}">⬇ دانلود قالب نمونه اکسل (همراه راهنمای ستون‌ها)</a></p>
+
+  <form method="post" enctype="multipart/form-data" style="margin:18px 0">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    {% for field in form %}
+      <div style="margin-bottom:14px">
+        {{ field.errors }}
+        <label for="{{ field.id_for_label }}"><b>{{ field.label }}</b></label><br>
+        {{ field }}
+        {% if field.help_text %}<div class="help">{{ field.help_text }}</div>{% endif %}
+      </div>
+    {% endfor %}
+    <button type="submit" name="action" value="check" class="button">۱. بررسی (بدون ذخیره)</button>
+    <button type="submit" name="action" value="import" class="button default">۲. ایمپورت</button>
+  </form>
+
+  {% if report %}
+    {% if report.errors %}
+      <div style="background:#fee2e2;color:#991b1b;padding:12px 16px;border-radius:6px;margin-bottom:12px">
+        <b>ایمپورت انجام نشد. این خطاها را در فایل اصلاح کنید:</b>
+        <ul>{% for e in report.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+      </div>
+    {% else %}
+      <div style="background:{% if report.dry_run %}#e0f2fe;color:#075985{% else %}#dcfce7;color:#166534{% endif %};padding:12px 16px;border-radius:6px;margin-bottom:12px">
+        <b>{% if report.dry_run %}نتیجه بررسی (چیزی ذخیره نشد) — اگر درست است «ایمپورت» را بزنید:{% else %}ایمپورت با موفقیت انجام شد:{% endif %}</b>
+        <ul>{% for line in report.lines %}<li>{{ line }}</li>{% endfor %}</ul>
+      </div>
+    {% endif %}
+    {% if report.warnings %}
+      <div style="background:#fef3c7;color:#92400e;padding:12px 16px;border-radius:6px">
+        <b>هشدارها:</b>
+        <ul>{% for w in report.warnings %}<li>{{ w }}</li>{% endfor %}</ul>
+      </div>
+    {% endif %}
+  {% endif %}
+</div>
+{% endblock %}
