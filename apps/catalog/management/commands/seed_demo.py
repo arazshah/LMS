@@ -21,12 +21,29 @@ User = get_user_model()
 def _ffmpeg_short_video(path: Path, width: int = 1280, height: int = 720, seconds: int = 6):
     """Generate a short colour-bar test video via ffmpeg."""
     cmd = [
-        "ffmpeg", "-y", "-loglevel", "error",
-        "-f", "lavfi", "-i", f"testsrc2=size={width}x{height}:rate=25",
-        "-f", "lavfi", "-i", "sine=frequency=440",
-        "-t", str(seconds),
-        "-c:v", "libx264", "-preset", "ultrafast", "-crf", "35",
-        "-c:a", "aac", "-shortest",
+        "ffmpeg",
+        "-y",
+        "-loglevel",
+        "error",
+        "-f",
+        "lavfi",
+        "-i",
+        f"testsrc2=size={width}x{height}:rate=25",
+        "-f",
+        "lavfi",
+        "-i",
+        "sine=frequency=440",
+        "-t",
+        str(seconds),
+        "-c:v",
+        "libx264",
+        "-preset",
+        "ultrafast",
+        "-crf",
+        "35",
+        "-c:a",
+        "aac",
+        "-shortest",
         str(path),
     ]
     subprocess.run(cmd, check=True)
@@ -36,6 +53,7 @@ def _ensure_cover(course, color: str = "#1a7a4a"):
     """Create a simple SVG cover image as a PNG placeholder."""
     try:
         from PIL import Image, ImageDraw
+
         img = Image.new("RGB", (640, 360), color)
         draw = ImageDraw.Draw(img)
         draw.text((60, 150), course.title, fill="white")
@@ -63,6 +81,7 @@ class Command(BaseCommand):
             from apps.catalog.models import Category
             from apps.live.models import LiveClass
             from apps.shop.models import Bundle, DiscountCode
+
             Category.objects.all().delete()
             Bundle.objects.all().delete()
             DiscountCode.objects.all().delete()
@@ -108,17 +127,26 @@ class Command(BaseCommand):
         if c1_new:
             _ensure_cover(c1, "#1a7a4a")
             self.stdout.write(f"  + دوره: {c1.title}")
-        self._add_chapters(c1, [
-            ("فصل ۱: آشنایی با داده مکانی", [
-                ("داده مکانی چیست؟", Lesson.Kind.TEXT, True),
-                ("نصب و راه‌اندازی QGIS", Lesson.Kind.VIDEO, True),
-                ("آشنایی با فرمت‌های رایج", Lesson.Kind.DOCUMENT, False),
-            ]),
-            ("فصل ۲: مقدمات یادگیری ماشین", [
-                ("شبکه عصبی کانولوشنی به زبان ساده", Lesson.Kind.VIDEO, False),
-                ("نوت‌بوک اول: طبقه‌بندی تصویر", Lesson.Kind.NOTEBOOK, False),
-            ]),
-        ])
+        self._add_chapters(
+            c1,
+            [
+                (
+                    "فصل ۱: آشنایی با داده مکانی",
+                    [
+                        ("داده مکانی چیست؟", Lesson.Kind.TEXT, True),
+                        ("نصب و راه‌اندازی QGIS", Lesson.Kind.VIDEO, True),
+                        ("آشنایی با فرمت‌های رایج", Lesson.Kind.DOCUMENT, False),
+                    ],
+                ),
+                (
+                    "فصل ۲: مقدمات یادگیری ماشین",
+                    [
+                        ("شبکه عصبی کانولوشنی به زبان ساده", Lesson.Kind.VIDEO, False),
+                        ("نوت‌بوک اول: طبقه‌بندی تصویر", Lesson.Kind.NOTEBOOK, False),
+                    ],
+                ),
+            ],
+        )
 
         # ── course 2: intermediate ────────────────────────────────────
         c2, c2_new = Course.objects.get_or_create(
@@ -142,21 +170,33 @@ class Command(BaseCommand):
             _ensure_cover(c2, "#1a5fa0")
             c2.prerequisites.add(c1)
             self.stdout.write(f"  + دوره: {c2.title}")
-        self._add_chapters(c2, [
-            ("فصل ۱: آماده‌سازی داده", [
-                ("دانلود و بررسی داده SpaceNet", Lesson.Kind.VIDEO, True),
-                ("تایل‌بندی و آگمنتیشن", Lesson.Kind.NOTEBOOK, False),
-                ("داده نمونه برای تمرین", Lesson.Kind.GEODATA, False),
-            ]),
-            ("فصل ۲: مدل U-Net", [
-                ("معماری U-Net — مرور کد", Lesson.Kind.VIDEO, False),
-                ("آموزش مدل روی GPU", Lesson.Kind.NOTEBOOK, False),
-            ]),
-            ("فصل ۳: ارزیابی و صادرات", [
-                ("محاسبه IoU و Precision/Recall", Lesson.Kind.VIDEO, False),
-                ("صادرات به shapefile با GDAL", Lesson.Kind.CODE, False),
-            ]),
-        ])
+        self._add_chapters(
+            c2,
+            [
+                (
+                    "فصل ۱: آماده‌سازی داده",
+                    [
+                        ("دانلود و بررسی داده SpaceNet", Lesson.Kind.VIDEO, True),
+                        ("تایل‌بندی و آگمنتیشن", Lesson.Kind.NOTEBOOK, False),
+                        ("داده نمونه برای تمرین", Lesson.Kind.GEODATA, False),
+                    ],
+                ),
+                (
+                    "فصل ۲: مدل U-Net",
+                    [
+                        ("معماری U-Net — مرور کد", Lesson.Kind.VIDEO, False),
+                        ("آموزش مدل روی GPU", Lesson.Kind.NOTEBOOK, False),
+                    ],
+                ),
+                (
+                    "فصل ۳: ارزیابی و صادرات",
+                    [
+                        ("محاسبه IoU و Precision/Recall", Lesson.Kind.VIDEO, False),
+                        ("صادرات به shapefile با GDAL", Lesson.Kind.CODE, False),
+                    ],
+                ),
+            ],
+        )
 
         # ── course 3: advanced ────────────────────────────────────────
         c3, c3_new = Course.objects.get_or_create(
@@ -179,17 +219,26 @@ class Command(BaseCommand):
             _ensure_cover(c3, "#7a1a1a")
             c3.prerequisites.add(c2)
             self.stdout.write(f"  + دوره: {c3.title}")
-        self._add_chapters(c3, [
-            ("فصل ۱: مقدمات SAR", [
-                ("رادار و تصویر SAR", Lesson.Kind.VIDEO, True),
-                ("پیش‌پردازش با SNAP", Lesson.Kind.VIDEO, False),
-            ]),
-            ("فصل ۲: تشخیص تغییر", [
-                ("روش‌های کلاسیک: تفاضل و نسبت", Lesson.Kind.NOTEBOOK, False),
-                ("یادگیری عمیق برای SAR", Lesson.Kind.VIDEO, False),
-                ("اسکریپت کامل پردازش", Lesson.Kind.CODE, False),
-            ]),
-        ])
+        self._add_chapters(
+            c3,
+            [
+                (
+                    "فصل ۱: مقدمات SAR",
+                    [
+                        ("رادار و تصویر SAR", Lesson.Kind.VIDEO, True),
+                        ("پیش‌پردازش با SNAP", Lesson.Kind.VIDEO, False),
+                    ],
+                ),
+                (
+                    "فصل ۲: تشخیص تغییر",
+                    [
+                        ("روش‌های کلاسیک: تفاضل و نسبت", Lesson.Kind.NOTEBOOK, False),
+                        ("یادگیری عمیق برای SAR", Lesson.Kind.VIDEO, False),
+                        ("اسکریپت کامل پردازش", Lesson.Kind.CODE, False),
+                    ],
+                ),
+            ],
+        )
 
         # ── bundle ────────────────────────────────────────────────────
         bundle, b_new = Bundle.objects.get_or_create(
@@ -208,12 +257,26 @@ class Command(BaseCommand):
 
         # ── discount codes ────────────────────────────────────────────
         codes = [
-            dict(code="TEST50", kind=DiscountCode.Kind.PERCENT, value=50,
-                 max_discount=500_000, description="۵۰٪ تخفیف آزمایشی"),
-            dict(code="FREE100", kind=DiscountCode.Kind.PERCENT, value=100,
-                 description="رایگان — برای تست پرداخت صفر"),
-            dict(code="GEO200", kind=DiscountCode.Kind.FIXED, value=200_000,
-                 min_amount=500_000, description="۲۰۰ هزار تومان تخفیف"),
+            dict(
+                code="TEST50",
+                kind=DiscountCode.Kind.PERCENT,
+                value=50,
+                max_discount=500_000,
+                description="۵۰٪ تخفیف آزمایشی",
+            ),
+            dict(
+                code="FREE100",
+                kind=DiscountCode.Kind.PERCENT,
+                value=100,
+                description="رایگان — برای تست پرداخت صفر",
+            ),
+            dict(
+                code="GEO200",
+                kind=DiscountCode.Kind.FIXED,
+                value=200_000,
+                min_amount=500_000,
+                description="۲۰۰ هزار تومان تخفیف",
+            ),
         ]
         for kw in codes:
             desc = kw.pop("description")
@@ -286,9 +349,9 @@ class Command(BaseCommand):
         from apps.videos.models import LessonVideo
         from apps.videos.transcode import transcode
 
-        video_lessons = Lesson.objects.filter(
-            kind=Lesson.Kind.VIDEO, is_published=True
-        ).exclude(video__status=LessonVideo.Status.READY)
+        video_lessons = Lesson.objects.filter(kind=Lesson.Kind.VIDEO, is_published=True).exclude(
+            video__status=LessonVideo.Status.READY
+        )
 
         if not video_lessons.exists():
             return

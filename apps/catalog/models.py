@@ -57,6 +57,13 @@ class Course(models.Model):
     category = models.ForeignKey(
         Category, on_delete=models.PROTECT, related_name="courses", verbose_name="دسته"
     )
+    code = models.CharField(
+        "کد دوره",
+        max_length=20,
+        blank=True,
+        db_index=True,
+        help_text="مثلاً F2 یا P1؛ برای ایمپورت اکسل (به‌روزرسانی به‌جای ساخت دوباره).",
+    )
     title = models.CharField("عنوان", max_length=200)
     slug = models.SlugField("نامک", max_length=100, unique=True, allow_unicode=True, blank=True)
     summary = models.CharField("خلاصه", max_length=300, blank=True)
@@ -138,9 +145,15 @@ class Lesson(models.Model):
     chapter = models.ForeignKey(
         Chapter, on_delete=models.CASCADE, related_name="lessons", verbose_name="فصل"
     )
+    code = models.CharField("کد جلسه", max_length=20, blank=True)
     title = models.CharField("عنوان", max_length=200)
     kind = models.CharField("نوع", max_length=20, choices=Kind, default=Kind.VIDEO)
     body = models.TextField("متن / توضیحات", blank=True)
+    internal_note = models.TextField(
+        "یادداشت داخلی (فایل‌های لازم)",
+        blank=True,
+        help_text="فقط برای مدیر: نام ویدیو و فایل‌هایی که باید برای این جلسه آپلود شود.",
+    )
     duration_minutes = models.PositiveIntegerField("مدت (دقیقه)", null=True, blank=True)
     is_free = models.BooleanField("رایگان (پیش‌نمایش)", default=False)
     is_published = models.BooleanField("منتشر شده", default=True)
